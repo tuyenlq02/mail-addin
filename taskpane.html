@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>NAPAS – Gửi Email Hàng Loạt</title>
+  <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Segoe UI',sans-serif;font-size:13px;color:#201f1e;background:#faf9f8;height:100vh;display:flex;flex-direction:column}
+
+    .header{background:#005a9e;color:#fff;padding:10px 14px 8px;flex-shrink:0}
+    .header h1{font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px}
+    .header p{font-size:10px;opacity:.82;margin-top:2px}
+    .napas-badge{background:#fff;color:#005a9e;font-size:10px;font-weight:700;padding:1px 6px;border-radius:3px;letter-spacing:.5px}
+
+    .tabs{display:flex;background:#fff;border-bottom:1px solid #edebe9;flex-shrink:0}
+    .tab{flex:1;padding:8px 4px;font-size:12px;font-weight:500;text-align:center;cursor:pointer;color:#605e5c;border-bottom:2px solid transparent}
+    .tab.active{color:#005a9e;border-bottom-color:#005a9e}
+
+    .content{flex:1;overflow-y:auto;padding:12px 14px}
+    .section{margin-bottom:13px}
+    lbl{display:block;font-size:10px;font-weight:700;color:#605e5c;margin-bottom:3px;text-transform:uppercase;letter-spacing:.3px}
+    input[type=text],textarea{width:100%;padding:5px 8px;font-size:12px;font-family:inherit;border:1px solid #c8c6c4;border-radius:3px;background:#fff;color:#201f1e;outline:none}
+    input[type=text]:focus,textarea:focus{border-color:#005a9e}
+    textarea{resize:vertical;min-height:80px;line-height:1.5}
+
+    /* cc row */
+
+    /* subject prefix */
+    .subj-wrap{display:flex;align-items:center;border:1px solid #c8c6c4;border-radius:3px;overflow:hidden;background:#fff}
+    .subj-prefix{padding:5px 8px;background:#e1effa;color:#005a9e;font-size:12px;font-weight:700;white-space:nowrap;border-right:1px solid #c8c6c4}
+    .subj-input{flex:1;padding:5px 8px;font-size:12px;border:none;outline:none;font-family:inherit;background:transparent;color:#201f1e}
+
+    /* file */
+    .file-row{display:flex;align-items:center;gap:6px;padding:5px 8px;background:#f3f2f1;border:1px solid #c8c6c4;border-radius:3px;font-size:12px;cursor:pointer;color:#201f1e}
+    .file-row:hover{background:#edebe9}
+    #fileName{flex:1;color:#605e5c;font-size:11px}
+
+    /* search */
+    .search-wrap{position:relative;margin-bottom:6px}
+    .search-wrap input{padding-left:26px}
+    .search-icon{position:absolute;left:8px;top:50%;transform:translateY(-50%);font-size:13px;color:#a19f9d;pointer-events:none}
+
+    /* dept table */
+    .dept-table-wrap{border:1px solid #edebe9;border-radius:3px;overflow:hidden}
+    .dept-header{display:grid;grid-template-columns:28px 1fr 1fr 32px;background:#f3f2f1;border-bottom:1px solid #edebe9;font-size:10px;font-weight:700;color:#605e5c;text-transform:uppercase}
+    .dept-header div{padding:5px 6px}
+    .dept-rows{max-height:280px;overflow-y:auto}
+    .dept-row{display:grid;grid-template-columns:28px 1fr 1fr 32px;border-bottom:1px solid #f3f2f1;align-items:center}
+    .dept-row:last-child{border-bottom:none}
+    .dept-row:nth-child(even){background:#faf9f8}
+    .dept-row .num{padding:4px 6px;font-size:10px;color:#a19f9d;text-align:center}
+    .dept-row input{border:none;border-radius:0;background:transparent;padding:4px 6px;font-size:11px;color:#201f1e;width:100%}
+    .dept-row input:focus{background:#e1effa}
+    .dept-row .to-cell input{border-right:1px solid #f3f2f1}
+    .del-btn{background:none;border:none;cursor:pointer;color:#c8c6c4;padding:4px 6px;font-size:13px;display:flex;align-items:center;justify-content:center}
+    .del-btn:hover{color:#d13438}
+    .add-row-btn{width:100%;padding:6px;font-size:11px;color:#005a9e;background:#f3f2f1;border:none;border-top:1px solid #edebe9;cursor:pointer;text-align:center}
+    .add-row-btn:hover{background:#e1effa}
+
+    /* select all */
+    .bulk-bar{display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap}
+    .bulk-bar label{font-size:11px;color:#605e5c;display:flex;align-items:center;gap:4px;cursor:pointer;text-transform:none;letter-spacing:0;font-weight:400}
+    .count-badge{background:#e1effa;color:#005a9e;font-size:10px;font-weight:700;padding:1px 7px;border-radius:10px}
+
+    /* import */
+    .import-drop{border:1px dashed #c8c6c4;border-radius:3px;padding:12px;text-align:center;cursor:pointer;color:#605e5c;font-size:11px;background:#fff}
+    .import-drop:hover{background:#f3f2f1}
+    #importStatus{font-size:11px;margin-top:5px;min-height:16px}
+
+    /* preview */
+    .preview-box{background:#fff;border:1px solid #edebe9;border-radius:3px;padding:10px;font-size:11px;line-height:1.7;white-space:pre-wrap;max-height:140px;overflow-y:auto}
+    .meta-row{font-size:11px;margin-bottom:6px;display:flex;gap:6px}
+    .meta-row b{color:#201f1e;min-width:70px}
+    .meta-val{color:#605e5c;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+    /* send tab */
+    .summary-card{background:#fff;border:1px solid #edebe9;border-radius:3px;padding:10px;margin-bottom:10px}
+    .btn-primary{width:100%;padding:9px;font-size:13px;font-weight:700;background:#005a9e;color:#fff;border:none;border-radius:3px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px}
+    .btn-primary:hover{background:#004880}
+    .btn-primary:disabled{background:#c8c6c4;cursor:not-allowed}
+    .btn-row{display:flex;gap:8px;margin-bottom:8px}
+    .btn-sec{flex:1;padding:7px;font-size:11px;font-weight:600;background:#fff;color:#005a9e;border:1px solid #005a9e;border-radius:3px;cursor:pointer}
+    .btn-sec:hover{background:#e1effa}
+
+    /* progress */
+    .progress-section{display:none;margin-top:12px}
+    .prog-bg{height:5px;background:#edebe9;border-radius:3px;overflow:hidden;margin:5px 0}
+    .prog-bar{height:100%;background:#005a9e;border-radius:3px;transition:width .3s}
+    .prog-text{font-size:10px;color:#605e5c;text-align:right}
+    .log-box{max-height:180px;overflow-y:auto;border:1px solid #edebe9;border-radius:3px;background:#fff;margin-top:6px}
+    .log-item{padding:3px 8px;font-size:10px;border-bottom:1px solid #f3f2f1;display:flex;align-items:center;gap:6px}
+    .log-item:last-child{border-bottom:none}
+    .ok{color:#107c10}.err{color:#d13438}.pend{color:#a19f9d}
+
+    .alert{padding:7px 10px;border-radius:3px;font-size:11px;margin-bottom:8px;display:none}
+    .alert.warn{background:#fff4ce;border-left:3px solid #f7a707;color:#7a4e00;display:block}
+    .alert.info{background:#dff6dd;border-left:3px solid #107c10;color:#054b16;display:block}
+
+    .footer{padding:6px 14px;background:#fff;border-top:1px solid #edebe9;flex-shrink:0;font-size:10px;color:#a19f9d;text-align:center}
+    .hidden{display:none!important}
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <h1><span class="napas-badge">NAPAS</span> Gửi Email Hàng Loạt</h1>
+  <p>75 tổ chức thành viên NAPAS 247 • CC mặc định: trangnth@napas.com.vn</p>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('compose',this)">✏️ Soạn</div>
+  <div class="tab" onclick="switchTab('depts',this)">🏦 Thành viên</div>
+  <div class="tab" onclick="switchTab('send',this)">🚀 Gửi</div>
+</div>
+
+<!-- ══ TAB 1: SOẠN ══ -->
+<div class="content" id="tab-compose">
+
+  <div class="section">
+    <lbl>Tiêu đề email</lbl>
+    <div class="subj-wrap">
+      <div class="subj-prefix">[NAPAS]</div>
+      <input class="subj-input" id="subject" type="text"
+        value="Cập nhật danh sách tháng 5/2026"
+        oninput="syncPreview()" placeholder="Nội dung tiêu đề…" />
+    </div>
+    <div style="font-size:10px;color:#a19f9d;margin-top:3px">Người nhận sẽ thấy: <b>[NAPAS] Cập nhật danh sách tháng 5/2026</b></div>
+  </div>
+
+  <div class="section">
+    <lbl>To (người nhận chính)</lbl>
+    <div style="font-size:10px;color:#605e5c;margin-bottom:4px">Điền ở tab <b>Thành viên</b> — mỗi tổ chức 1 dòng</div>
+  </div>
+
+  <div class="section">
+    <lbl>Cc</lbl>
+    <input type="text" id="ccField"
+      value="trangnth@napas.com.vn"
+      oninput="syncPreview()"
+      placeholder="email1@napas.com.vn;email2@napas.com.vn" />
+    <div style="font-size:10px;color:#a19f9d;margin-top:3px">Nhiều địa chỉ CC cách nhau bằng dấu <b>;</b></div>
+  </div>
+
+  <div class="section">
+    <lbl>Nội dung email</lbl>
+    <textarea id="body" rows="7" oninput="syncPreview()">Kính gửi {TEN_TO_CHUC},
+
+Trân trọng thông báo đến Quý tổ chức thành viên về danh sách cập nhật tháng 5/2026 liên quan đến dịch vụ chuyển tiền nhanh NAPAS 247.
+
+Vui lòng xem thông tin chi tiết trong file đính kèm và phản hồi về NAPAS trước ngày 15/05/2026 nếu có thắc mắc.
+
+Trân trọng,
+NAPAS</textarea>
+  </div>
+
+  <div class="section">
+    <lbl>File đính kèm</lbl>
+    <div class="file-row" onclick="document.getElementById('fileInput').click()">
+      <span>📎</span>
+      <span id="fileName">Nhấn để chọn file đính kèm…</span>
+    </div>
+    <input type="file" id="fileInput" style="display:none" multiple onchange="handleFiles(this)" />
+  </div>
+
+  <div class="section">
+    <lbl>Xem trước</lbl>
+    <div class="meta-row"><b>Tiêu đề:</b><span class="meta-val" id="prevSubj"></span></div>
+    <div class="meta-row"><b>Cc:</b><span class="meta-val" id="prevCc"></span></div>
+    <div class="preview-box" id="previewBody"></div>
+  </div>
+</div>
+
+<!-- ══ TAB 2: THÀNH VIÊN ══ -->
+<div class="content hidden" id="tab-depts">
+
+  <div class="section">
+    <div class="bulk-bar">
+      <label><input type="checkbox" id="chkAll" onchange="toggleAll(this)"> Chọn tất cả</label>
+      <span class="count-badge" id="selectedCount">0 / 75</span>
+      <button class="btn-sec" style="flex:none;padding:4px 10px;font-size:10px" onclick="fillEmailsFromAbbr()">⚡ Tự điền email mẫu</button>
+    </div>
+
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="searchBox" placeholder="Tìm tổ chức…" oninput="filterDepts(this.value)" />
+    </div>
+
+    <div class="dept-table-wrap">
+      <div class="dept-header">
+        <div>✓</div><div>Tổ chức thành viên</div><div>Email To (cách nhau ;)</div><div></div>
+      </div>
+      <div class="dept-rows" id="deptRows"></div>
+    </div>
+    <div style="font-size:10px;color:#a19f9d;margin-top:5px">
+      ⚡ Tự điền email mẫu: tạo <code>abbr@napas.com.vn</code> dựa trên tên viết tắt. Cần cập nhật lại email thực tế.
+    </div>
+  </div>
+
+  <div class="section" style="margin-top:14px">
+    <lbl>Import từ CSV</lbl>
+    <div class="import-drop" onclick="document.getElementById('csvInput').click()">
+      📂 Nhấn để import CSV (Cột A: Tên tổ chức, Cột B: Email)
+    </div>
+    <input type="file" id="csvInput" accept=".csv,.txt" style="display:none" onchange="importCSV(this)" />
+    <div id="importStatus"></div>
+  </div>
+</div>
+
+<!-- ══ TAB 3: GỬI ══ -->
+<div class="content hidden" id="tab-send">
+
+  <div id="alertWarn" class="alert"></div>
+
+  <div class="summary-card" id="summaryCard"></div>
+
+  <div class="btn-row">
+    <button class="btn-sec" onclick="checkReady()">🔍 Kiểm tra</button>
+    <button class="btn-sec" onclick="exportVBA()">⬇️ Xuất VBA</button>
+  </div>
+
+  <button class="btn-primary" id="sendBtn" onclick="startSend()">
+    🚀 Gửi <span id="sendCount">0</span> email ngay
+  </button>
+
+  <div class="progress-section" id="progressSection">
+    <div style="display:flex;justify-content:space-between;margin-top:10px">
+      <span style="font-size:11px;font-weight:600">Đang gửi…</span>
+      <span class="prog-text" id="progressText">0 / 0</span>
+    </div>
+    <div class="prog-bg"><div class="prog-bar" id="progressBar" style="width:0%"></div></div>
+    <div class="log-box" id="logBox"></div>
+  </div>
+
+  <div id="alertDone" class="alert" style="margin-top:10px"></div>
+</div>
+
+<div class="footer">
+  NAPAS 247 • <span id="footerInfo">0 tổ chức đã chọn</span>
+</div>
+
+<script>
+// ─── Data: 75 TCTV NAPAS 247 ─────────────────────────────────────────────────
+const NAPAS_MEMBERS = [
+  {stt:1,  name:"TMCP An Bình",                                                                            abbr:"ABBANK"},
+  {stt:2,  name:"TMCP Á Châu",                                                                             abbr:"ACB"},
+  {stt:3,  name:"TMCP Bắc Á",                                                                              abbr:"BAC A BANK"},
+  {stt:4,  name:"TMCP Đầu tư và Phát triển Việt Nam",                                                     abbr:"BIDV"},
+  {stt:5,  name:"TMCP Bảo Việt",                                                                           abbr:"BAOVIET Bank"},
+  {stt:6,  name:"TM TNHH MTV Ngoại thương Công nghệ số",                                                  abbr:"VCBNeo"},
+  {stt:7,  name:"Hợp tác xã Việt Nam",                                                                    abbr:"Co-opbank"},
+  {stt:8,  name:"TNHH MTV CIMB",                                                                          abbr:"CIMB Bank"},
+  {stt:9,  name:"DBS - chi nhánh Thành phố Hồ Chí Minh",                                                 abbr:"DBS"},
+  {stt:10, name:"TNHH Một thành viên số Vikki",                                                           abbr:"Vikki Bank"},
+  {stt:11, name:"TMCP Xuất nhập khẩu Việt Nam",                                                           abbr:"EIB"},
+  {stt:12, name:"TM TNHH MTV Kỷ Nguyên Thịnh Vượng",                                                     abbr:"GPBANK"},
+  {stt:13, name:"TMCP Phát Triển Thành Phố Hồ Chí Minh",                                                 abbr:"HDBank"},
+  {stt:14, name:"TNHH MTV Hongleong Việt Nam",                                                            abbr:"HLBVN"},
+  {stt:15, name:"TNHH MTV HSBC (Việt Nam)",                                                               abbr:"HSBC VN"},
+  {stt:16, name:"IBK - chi nhánh Hà Nội",                                                                 abbr:"IBK HN"},
+  {stt:17, name:"IBK - chi nhánh HCM",                                                                    abbr:"IBK HCM"},
+  {stt:18, name:"TMCP Công Thương Việt Nam",                                                              abbr:"VietinBank"},
+  {stt:19, name:"TNHH Indovina",                                                                          abbr:"IVB"},
+  {stt:20, name:"Kookmin - Chi nhánh Hà Nội",                                                             abbr:"KB HN"},
+  {stt:21, name:"Kookmin - Chi nhánh Thành phố Hồ Chí Minh",                                             abbr:"KB HCM"},
+  {stt:22, name:"TMCP Kiên Long",                                                                         abbr:"KLB"},
+  {stt:23, name:"Đại chúng TNHH Kasikornbank - Chi nhánh TP. HCM",                                       abbr:"KBank"},
+  {stt:24, name:"TMCP Lộc Phát Việt Nam",                                                                 abbr:"LPBank"},
+  {stt:25, name:"TMCP Quân Đội",                                                                          abbr:"MB"},
+  {stt:26, name:"TMCP Hàng Hải Việt nam",                                                                 abbr:"MSB"},
+  {stt:27, name:"TMCP Nam Á",                                                                             abbr:"NAMABANK"},
+  {stt:28, name:"TMCP Quốc Dân",                                                                          abbr:"NCB"},
+  {stt:29, name:"NONGHYUP - Chi nhánh Hà Nội",                                                           abbr:"Nonghyup"},
+  {stt:30, name:"TMCP Phương Đông",                                                                       abbr:"OCB"},
+  {stt:31, name:"TNHH MTV Việt Nam Hiện Đại",                                                             abbr:"MBV"},
+  {stt:32, name:"TNHH MTV Public Việt Nam",                                                               abbr:"Public Bank Viet Nam"},
+  {stt:33, name:"TMCP Thịnh vượng và Phát triển",                                                        abbr:"PGBANK"},
+  {stt:34, name:"TMCP Đại Chúng Việt Nam",                                                               abbr:"PVCOMBANK"},
+  {stt:35, name:"TMCP Sài Gòn",                                                                          abbr:"SCB"},
+  {stt:36, name:"TNHH MTV Standard Chartered Việt Nam",                                                  abbr:"SCBVN"},
+  {stt:37, name:"TMCP Đông Nam Á",                                                                       abbr:"SeABank"},
+  {stt:38, name:"TMCP Sài Gòn Công Thương",                                                              abbr:"SAIGONBANK"},
+  {stt:39, name:"TMCP Sài Gòn Hà Nội",                                                                   abbr:"SHB"},
+  {stt:40, name:"TMCP Sài Gòn Thương Tín",                                                               abbr:"SACOMBANK"},
+  {stt:41, name:"TNHH MTV Shinhan Việt Nam",                                                             abbr:"SHINHAN VN"},
+  {stt:42, name:"TMCP Kỹ thương Việt Nam",                                                               abbr:"Techcombank"},
+  {stt:43, name:"TMCP Tiên Phong",                                                                       abbr:"TPBank"},
+  {stt:44, name:"TNHH MTV United Overseas",                                                              abbr:"UOB"},
+  {stt:45, name:"TMCP Việt Á",                                                                           abbr:"VietABank"},
+  {stt:46, name:"Nông nghiệp và Phát triển Nông thôn Việt Nam",                                          abbr:"Agribank"},
+  {stt:47, name:"TMCP Ngoại Thương Việt Nam",                                                            abbr:"Vietcombank"},
+  {stt:48, name:"TMCP Bản Việt",                                                                         abbr:"BVBank"},
+  {stt:49, name:"TMCP Quốc tế Việt Nam",                                                                 abbr:"VIB"},
+  {stt:50, name:"TMCP Việt Nam Thương Tín",                                                              abbr:"VIETBANK"},
+  {stt:51, name:"TMCP Việt Nam Thịnh Vượng",                                                             abbr:"VPBank"},
+  {stt:52, name:"Liên doanh Việt - Nga",                                                                 abbr:"VRB"},
+  {stt:53, name:"TNHH MTV Woori Việt Nam",                                                               abbr:"Wooribank"},
+  {stt:54, name:"Chính sách Xã hội",                                                                     abbr:"VBSP"},
+  {stt:55, name:"KEB HANA - CHI NHÁNH HÀ NỘI",                                                          abbr:"KEB HANA HN"},
+  {stt:56, name:"KEB HANA - CHI NHÁNH THÀNH PHỐ HỒ CHÍ MINH",                                          abbr:"KEB HANA HCM"},
+  {stt:57, name:"Trung tâm dịch vụ tài chính số VNPT – Chi nhánh Tổng công ty truyền thông",            abbr:"VNPT Money"},
+  {stt:58, name:"Tổng Công ty Dịch vụ Số Viettel – Chi nhánh Tập đoàn Công nghiệp Viễn thông Quân đội",abbr:"Viettel Money"},
+  {stt:59, name:"Công ty Tài chính TNHH MTV Mirae Asset (Việt Nam)",                                    abbr:"MAFC"},
+  {stt:60, name:"Citibank, N.A, - Chi nhánh Hà Nội",                                                    abbr:"CITIBANK VIETNAM"},
+  {stt:61, name:"BNP Paribas - Chi nhánh Hà Nội",                                                       abbr:"BNP PARIBAS HN"},
+  {stt:62, name:"BNP Paribas - Chi nhánh TP. Hồ Chí Minh",                                              abbr:"BNP PARIBAS HCM"},
+  {stt:63, name:"Cathay United Bank – Chi nhánh Hồ Chí Minh",                                           abbr:"CUBHCM"},
+  {stt:64, name:"Tổng Công ty viễn thông Mobifone",                                                     abbr:"Mobifone Tiendidong"},
+  {stt:65, name:"Đầu tư và Phát triển Campuchia – Chi nhánh Hà Nội",                                    abbr:"BIDC"},
+  {stt:66, name:"Công ty Tài chính TNHH MTV Shinhan Việt Nam",                                          abbr:"SVFC"},
+  {stt:67, name:"Bank of China (Hongkong) Limited – Chi nhánh Hồ Chí Minh",                             abbr:"BOCHK"},
+  {stt:68, name:"NGÂN HÀNG INDUSTRIAL AND COMMERCIAL BANK OF CHINA LIMITED - CHI NHÁNH HÀ NỘI",        abbr:"ICBC"},
+  {stt:69, name:"Công ty Cổ phần Dịch vụ Di động Trực tuyến",                                          abbr:"MoMo"},
+  {stt:70, name:"Công ty Cổ phần Zion",                                                                  abbr:"ZaloPay"},
+  {stt:71, name:"Công ty Cổ phần Dịch vụ Trực tuyến Cộng Đồng Việt",                                   abbr:"PAYOO"},
+  {stt:72, name:"Ngân hàng Sinopac – Chi nhánh Thành phố Hồ Chí Minh",                                 abbr:"Sinopac"},
+  {stt:73, name:"Ngân hàng Deutsche Bank – Chi nhánh Thành phố Hồ Chí Minh",                           abbr:"DB"},
+  {stt:74, name:"Ngân hàng TM TNHH E.SUN - Chi nhánh Đồng Nai",                                        abbr:"ESUN"},
+  {stt:75, name:"Tổng Công ty truyền thông đa phương tiện – Công ty TNHH 1TV",                         abbr:"VTC"},
+];
+
+// ─── State ───────────────────────────────────────────────────────────────────
+// rows[i] = {name, emails, checked}
+const rows = NAPAS_MEMBERS.map(m => ({name: m.name, abbr: m.abbr, emails: '', checked: false}));
+let attachedFiles = [];
+let isSending = false;
+
+// ─── Init ────────────────────────────────────────────────────────────────────
+Office.onReady(() => { renderRows(); syncPreview(); updateFooter(); });
+
+// ─── Tabs ─────────────────────────────────────────────────────────────────────
+function switchTab(id, btn) {
+  document.querySelectorAll('.content').forEach(el => el.classList.add('hidden'));
+  document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.remove('hidden');
+  btn.classList.add('active');
+  if (id === 'send') buildSummary();
+}
+
+// ─── Render dept rows ─────────────────────────────────────────────────────────
+function renderRows(filter = '') {
+  const box = document.getElementById('deptRows');
+  box.innerHTML = '';
+  const q = filter.toLowerCase();
+  rows.forEach((r, i) => {
+    if (r._deleted) return;
+    if (q && !r.name.toLowerCase().includes(q) && !r.abbr.toLowerCase().includes(q)) return;
+    const div = document.createElement('div');
+    div.className = 'dept-row';
+    div.innerHTML = `
+      <div class="num" style="padding:0 4px;display:flex;align-items:center;justify-content:center">
+        <input type="checkbox" ${r.checked?'checked':''} onchange="rows[${i}].checked=this.checked;updateFooter()">
+      </div>
+      <div class="to-cell">
+        <input value="${esc(r.name)}" title="${esc(r.name)}"
+          oninput="rows[${i}].name=this.value;updateFooter()">
+      </div>
+      <div>
+        <input value="${esc(r.emails)}" placeholder="email@to.vn;email2@to.vn"
+          oninput="rows[${i}].emails=this.value">
+      </div>
+      <button class="del-btn" onclick="rows[${i}]._deleted=true;renderRows(document.getElementById('searchBox').value)" title="Xóa">✕</button>`;
+    box.appendChild(div);
+  });
+  updateFooter();
+}
+
+function filterDepts(q) { renderRows(q); }
+
+function toggleAll(chk) {
+  rows.forEach(r => { if (!r._deleted) r.checked = chk.checked; });
+  renderRows(document.getElementById('searchBox').value);
+}
+
+function fillEmailsFromAbbr() {
+  rows.forEach(r => {
+    if (!r._deleted && !r.emails.trim()) {
+      const clean = r.abbr.replace(/[\s/\\,]+/g, '').toLowerCase();
+      r.emails = clean + '@napas.com.vn';
+    }
+  });
+  renderRows(document.getElementById('searchBox').value);
+}
+
+// ─── File ─────────────────────────────────────────────────────────────────────
+function handleFiles(input) {
+  attachedFiles = Array.from(input.files);
+  document.getElementById('fileName').textContent =
+    attachedFiles.length ? attachedFiles.map(f => f.name).join(', ') : 'Nhấn để chọn file…';
+}
+
+// ─── Import CSV ───────────────────────────────────────────────────────────────
+function importCSV(input) {
+  const file = input.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const lines = e.target.result.split('\n').filter(l => l.trim());
+    let updated = 0;
+    lines.forEach(line => {
+      const parts = line.split(',');
+      if (parts.length < 2) return;
+      const name = parts[0].replace(/^"|"$/g,'').trim();
+      const email = parts.slice(1).join(',').replace(/^"|"$/g,'').trim();
+      const match = rows.find(r => r.name.trim() === name || r.abbr.trim() === name);
+      if (match) { match.emails = email; updated++; }
+    });
+    document.getElementById('importStatus').innerHTML =
+      `<span style="color:#107c10">✅ Cập nhật ${updated} tổ chức từ CSV</span>`;
+    renderRows();
+  };
+  reader.readAsText(file, 'UTF-8');
+}
+
+// ─── Preview ──────────────────────────────────────────────────────────────────
+function syncPreview() {
+  const subj = '[NAPAS] ' + (document.getElementById('subject').value || '');
+  const body = document.getElementById('body').value;
+  const cc   = document.getElementById('ccField').value.trim();
+  document.getElementById('prevSubj').textContent = subj;
+  document.getElementById('prevCc').textContent   = cc || '(chưa nhập)';
+  document.getElementById('previewBody').textContent =
+    body.replace(/\{TEN_TO_CHUC\}/g, 'TMCP An Bình (ABBANK)');
+}
+
+// ─── Footer ───────────────────────────────────────────────────────────────────
+function updateFooter() {
+  const sel = rows.filter(r => !r._deleted && r.checked).length;
+  const tot = rows.filter(r => !r._deleted).length;
+  document.getElementById('footerInfo').textContent = `${sel} / ${tot} tổ chức đã chọn`;
+  document.getElementById('selectedCount').textContent = `${sel} / ${tot}`;
+}
+
+// ─── Build CC string ──────────────────────────────────────────────────────────
+function buildCC() {
+  return document.getElementById('ccField').value.trim();
+}
+
+function fullSubject() {
+  return '[NAPAS] ' + document.getElementById('subject').value.trim();
+}
+
+// ─── Summary ──────────────────────────────────────────────────────────────────
+function buildSummary() {
+  const selected = rows.filter(r => !r._deleted && r.checked && r.emails.trim());
+  const noEmail  = rows.filter(r => !r._deleted && r.checked && !r.emails.trim());
+  document.getElementById('sendCount').textContent = selected.length;
+  document.getElementById('summaryCard').innerHTML = `
+    <div class="meta-row"><b>Tiêu đề:</b><span class="meta-val">${esc(fullSubject())}</span></div>
+    <div class="meta-row"><b>CC:</b><span class="meta-val">${esc(buildCC())}</span></div>
+    <div class="meta-row"><b>Tổ chức đã chọn:</b><span class="meta-val">${rows.filter(r=>!r._deleted&&r.checked).length} tổ chức</span></div>
+    <div class="meta-row"><b>Có email To:</b><span class="meta-val" style="color:#107c10">${selected.length} tổ chức ✓</span></div>
+    ${noEmail.length ? `<div class="meta-row"><b>Thiếu email:</b><span class="meta-val" style="color:#d13438">${noEmail.length} tổ chức ⚠</span></div>` : ''}
+    <div class="meta-row"><b>File đính kèm:</b><span class="meta-val">${attachedFiles.length ? attachedFiles.map(f=>f.name).join(', ') : 'Không có'}</span></div>`;
+}
+
+function checkReady() {
+  const sel = rows.filter(r => !r._deleted && r.checked);
+  const warn = document.getElementById('alertWarn');
+  const issues = [];
+  if (!document.getElementById('subject').value.trim()) issues.push('Chưa nhập tiêu đề email');
+  if (!sel.length) issues.push('Chưa chọn tổ chức nào (tab Thành viên)');
+  const noEmail = sel.filter(r => !r.emails.trim());
+  if (noEmail.length) issues.push(`${noEmail.length} tổ chức đã chọn chưa có email To`);
+  if (issues.length) {
+    warn.className = 'alert warn';
+    warn.innerHTML = issues.map(s => '⚠️ ' + s).join('<br>');
+  } else {
+    warn.className = 'alert info';
+    warn.innerHTML = `✅ Sẵn sàng gửi ${sel.filter(r=>r.emails.trim()).length} email`;
+  }
+}
+
+// ─── Send ─────────────────────────────────────────────────────────────────────
+async function startSend() {
+  if (isSending) return;
+  const targets = rows.filter(r => !r._deleted && r.checked && r.emails.trim());
+  if (!targets.length) { checkReady(); return; }
+
+  isSending = true;
+  const btn = document.getElementById('sendBtn');
+  btn.disabled = true;
+  document.getElementById('alertDone').className = 'alert';
+  document.getElementById('alertWarn').className = 'alert';
+
+  const ps = document.getElementById('progressSection');
+  ps.style.display = 'block';
+  document.getElementById('logBox').innerHTML = '';
+
+  const subj = fullSubject();
+  const body = document.getElementById('body').value;
+  const cc   = buildCC();
+  let ok = 0, err = 0;
+
+  for (let i = 0; i < targets.length; i++) {
+    const t = targets[i];
+    const pct = Math.round((i + 1) / targets.length * 100);
+    document.getElementById('progressBar').style.width = pct + '%';
+    document.getElementById('progressText').textContent = `${i+1} / ${targets.length}`;
+
+    addLog('pend', `Đang gửi → ${t.abbr || t.name}…`);
+    try {
+      await sendOne(subj, body, t, cc);
+      updateLastLog('ok', `✓ ${t.name} (${t.abbr}) → ${t.emails}`);
+      ok++;
+    } catch(e) {
+      updateLastLog('err', `✗ ${t.name} — ${e.message || e}`);
+      err++;
+    }
+    await sleep(500);
+  }
+
+  isSending = false;
+  btn.disabled = false;
+  btn.innerHTML = `✅ Hoàn tất — gửi lại?`;
+  const done = document.getElementById('alertDone');
+  done.className = 'alert info';
+  done.innerHTML = `✅ Đã gửi <b>${ok}</b> email${err ? ` &nbsp;|&nbsp; ❌ Lỗi: <b>${err}</b>` : ''}`;
+}
+
+function sendOne(subj, bodyTpl, target, cc) {
+  return new Promise((resolve, reject) => {
+    try {
+      const bodyFinal = bodyTpl
+        .replace(/\{TEN_TO_CHUC\}/g, `${target.name} (${target.abbr})`)
+        .replace(/\{TEN_VIET_TAT\}/g, target.abbr);
+      const toEmails = target.emails.split(';').map(e => e.trim()).filter(Boolean);
+      const ccEmails = cc.split(';').map(e => e.trim()).filter(Boolean);
+
+      Office.context.mailbox.displayNewMessageForm({
+        toRecipients : toEmails.map(e => ({emailAddress:{address:e}})),
+        ccRecipients : ccEmails.map(e => ({emailAddress:{address:e}})),
+        subject      : subj,
+        htmlBody     : bodyFinal.replace(/\n/g, '<br>'),
+      });
+      resolve();
+    } catch(e) { reject(e); }
+  });
+}
+
+// ─── Export VBA ───────────────────────────────────────────────────────────────
+function exportVBA() {
+  const targets = rows.filter(r => !r._deleted && r.checked && r.emails.trim());
+  const subj    = fullSubject();
+  const body    = document.getElementById('body').value;
+  const cc      = buildCC();
+
+  const deptLines = targets.map(t =>
+    `    Call GuiMot("${t.name.replace(/"/g,'""')}", "${t.abbr.replace(/"/g,'""')}", "${t.emails.replace(/"/g,'""')}", subj, bodyTmpl, ccStr, filePath)`
+  ).join('\n');
+
+  const vba = `' ===================================================
+' NAPAS – MACRO GỬI EMAIL HÀNG LOẠT QUA OUTLOOK
+' Cách dùng: Alt+F11 > Insert > Module > Dán vào
+' ===================================================
+
+Sub GuiEmailNAPAS()
+    Dim subj     As String
+    Dim bodyTmpl As String
+    Dim ccStr    As String
+    Dim filePath As String
+
+    subj     = "${subj.replace(/"/g,'""')}"
+    ccStr    = "${cc.replace(/"/g,'""')}"
+    filePath = ""    ' <-- Điền đường dẫn file đính kèm nếu có
+
+    bodyTmpl = "Kính gửi {TEN_TO_CHUC}," & vbCrLf & vbCrLf & _
+               "Trân trọng thông báo đến Quý tổ chức thành viên về danh sách cập nhật tháng 5/2026." & vbCrLf & vbCrLf & _
+               "Vui lòng xem file đính kèm và phản hồi về NAPAS trước ngày 15/05/2026." & vbCrLf & vbCrLf & _
+               "Trân trọng," & vbCrLf & "NAPAS"
+
+${deptLines}
+
+    MsgBox "Hoàn tất! Đã gửi ${targets.length} email.", vbInformation, "NAPAS Email"
+End Sub
+
+Sub GuiMot(tenTC As String, abbr As String, emails As String, subj As String, bodyTmpl As String, ccStr As String, fp As String)
+    Dim olApp  As Object
+    Dim olMail As Object
+    Set olApp  = CreateObject("Outlook.Application")
+    Set olMail = olApp.CreateItem(0)
+
+    Dim bodyFinal As String
+    bodyFinal = Replace(bodyTmpl, "{TEN_TO_CHUC}", tenTC & " (" & abbr & ")")
+
+    With olMail
+        .To = emails
+        .CC = ccStr
+        .Subject = subj
+        .Body    = bodyFinal
+        If fp <> "" And Dir(fp) <> "" Then .Attachments.Add fp
+        .Send
+    End With
+
+    Set olMail = Nothing
+    Set olApp  = Nothing
+    Application.Wait Now + TimeValue("00:00:01")
+End Sub`;
+
+  const blob = new Blob([vba], {type:'text/plain;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'NAPAS_GuiEmailHangLoat.bas';
+  a.click();
+}
+
+// ─── Log helpers ──────────────────────────────────────────────────────────────
+function addLog(type, msg) {
+  const el = document.createElement('div');
+  el.className = `log-item ${type}`;
+  el.textContent = msg;
+  el.dataset.live = '1';
+  document.getElementById('logBox').prepend(el);
+}
+function updateLastLog(type, msg) {
+  const el = document.querySelector('.log-item[data-live="1"]');
+  if (el) { el.className = `log-item ${type}`; el.textContent = msg; delete el.dataset.live; }
+}
+
+// ─── Utils ────────────────────────────────────────────────────────────────────
+function esc(s) {
+  return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+</script>
+</body>
+</html>
