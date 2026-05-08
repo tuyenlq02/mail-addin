@@ -2,1060 +2,563 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
 <meta name="theme-color" content="#E53E3E"/>
 <meta name="mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-<meta name="apple-mobile-web-app-title" content="VietQR Global"/>
-<link rel="manifest" href="manifest.json"/>
 <title>VietQR Global Finder</title>
-
-<!-- Leaflet map -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.css"/>
-<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.js"></script>
-
 <style>
-:root{
-  --red:#E53E3E; --red-dark:#C53030; --red-light:#FFF5F5;
-  --blue:#2B6CB0; --green:#276749; --purple:#553C9A; --amber:#B7791F;
-  --text:#111827; --muted:#6b7280; --border:#e5e7eb; --bg:#f9fafb;
-  --safe-top:env(safe-area-inset-top,0px);
-  --safe-bot:env(safe-area-inset-bottom,0px);
-}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html,body{height:100%;margin:0;padding:0;overflow:hidden;font-family:'Segoe UI',Roboto,'Noto Sans KR','Noto Sans SC',sans-serif;background:#f0f0f0}
-
-/* ── APP SHELL ── */
-#app{height:100dvh;width:100%;display:flex;flex-direction:column;max-width:520px;margin:0 auto;position:relative;overflow:hidden;background:#fff}
-body{display:flex;justify-content:center;background:#f0f0f0}
-.screen{position:absolute;inset:0;display:flex;flex-direction:column;transition:transform .3s ease,opacity .3s;will-change:transform}
-.screen.hidden{transform:translateX(100%);pointer-events:none;opacity:0}
-.screen.slide-left{transform:translateX(-100%);pointer-events:none;opacity:0}
-
-/* ── STATUS BAR SPACER ── */
-.sb{height:var(--safe-top);background:var(--red);flex-shrink:0}
-
-/* ── APPBAR ── */
-.appbar{background:var(--red);padding:10px 16px 12px;flex-shrink:0;color:#fff}
-.appbar-row{display:flex;align-items:center;gap:10px}
-.app-logo{width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;color:#fff;flex-shrink:0;letter-spacing:-1px}
-.appbar h1{font-size:16px;font-weight:700;flex:1;letter-spacing:-.3px}
-.appbar-sub{font-size:11px;opacity:.8;margin-top:1px}
-.icon-btn{background:none;border:none;cursor:pointer;padding:6px;border-radius:8px;color:rgba(255,255,255,.9);display:flex;align-items:center;justify-content:center;font-size:20px}
-.icon-btn:active{background:rgba(255,255,255,.15)}
-
-/* ── SEARCH ── */
-.search-wrap{background:rgba(255,255,255,.2);border-radius:24px;padding:8px 14px;display:flex;align-items:center;gap:8px;margin-top:10px}
-.search-wrap input{flex:1;background:transparent;border:none;outline:none;color:#fff;font-size:14px;font-family:inherit}
-.search-wrap input::placeholder{color:rgba(255,255,255,.65)}
-#clearSearchBtn{display:none;background:none;border:none;cursor:pointer;color:rgba(255,255,255,.8);font-size:16px;padding:0;line-height:1}
-
-/* ── FILTER CHIPS ── */
-.filter-bar{display:flex;gap:6px;padding:9px 12px 7px;overflow-x:auto;background:#fff;border-bottom:1px solid var(--border);flex-shrink:0;scrollbar-width:none}
-.filter-bar::-webkit-scrollbar{display:none}
-.chip{padding:5px 12px;border-radius:20px;font-size:12px;white-space:nowrap;cursor:pointer;border:1.5px solid var(--border);background:var(--bg);color:var(--muted);font-weight:600;transition:all .15s;user-select:none;-webkit-user-select:none}
-.chip.active{background:var(--red);color:#fff;border-color:var(--red)}
-.chip:active{opacity:.75}
-
-/* ── MAP ── */
-#map{flex:1;z-index:1}
-.leaflet-container{background:#e8eef4 !important}
-.map-fab-group{position:absolute;right:14px;bottom:calc(var(--safe-bot) + 200px);display:flex;flex-direction:column;gap:8px;z-index:10}
-.fab{width:44px;height:44px;border-radius:50%;background:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 2px 8px rgba(0,0,0,.18);transition:transform .15s}
+html,body{height:100%;background:#ddd;font-family:'Segoe UI',Roboto,sans-serif}
+#app{height:100svh;width:100%;max-width:520px;margin:0 auto;display:flex;flex-direction:column;background:#fff;position:relative;overflow:hidden}
+:root{--red:#E53E3E;--redd:#C53030;--text:#111827;--sub:#6b7280;--bdr:#e5e7eb;--bg:#f9fafb}
+.ab{background:var(--red);padding:10px 14px 12px;flex-shrink:0;color:#fff}
+.ab-row{display:flex;align-items:center;gap:10px}
+.ab-logo{width:32px;height:32px;border-radius:9px;background:rgba(255,255,255,.22);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;flex-shrink:0}
+.logo-img{height:26px;width:auto;object-fit:contain}
+.ab h1{font-size:15px;font-weight:700;flex:1}
+.ab-sub{font-size:11px;opacity:.78;margin-top:2px}
+.ib{background:none;border:none;cursor:pointer;padding:6px;border-radius:8px;color:rgba(255,255,255,.9);font-size:20px;display:flex;align-items:center}
+.ib:active{background:rgba(255,255,255,.18)}
+.srch{background:rgba(255,255,255,.2);border-radius:24px;padding:7px 13px;display:flex;align-items:center;gap:7px;margin-top:9px}
+.srch input{flex:1;background:transparent;border:none;outline:none;color:#fff;font-size:13px;font-family:inherit}
+.srch input::placeholder{color:rgba(255,255,255,.6)}
+#clrBtn{display:none;background:none;border:none;cursor:pointer;color:rgba(255,255,255,.8);font-size:15px;padding:0}
+.chips{display:flex;gap:5px;padding:8px 12px 7px;overflow-x:auto;background:#fff;border-bottom:1px solid var(--bdr);flex-shrink:0;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{padding:5px 12px;border-radius:20px;font-size:12px;white-space:nowrap;cursor:pointer;border:1.5px solid var(--bdr);background:var(--bg);color:var(--sub);font-weight:600;user-select:none}
+.chip.on{background:var(--red);color:#fff;border-color:var(--red)}
+.chip:active{opacity:.7}
+#mapWrap{height:220px;flex-shrink:0;position:relative;overflow:hidden;background:#dce8f0}
+#mapSvg{width:100%;height:100%}
+.mfabs{position:absolute;right:10px;top:10px;display:flex;flex-direction:column;gap:6px;z-index:5}
+.fab{width:36px;height:36px;border-radius:50%;background:#fff;border:none;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.18)}
 .fab:active{transform:scale(.92)}
-.fab.primary{background:var(--red);color:#fff}
-
-/* ── CUSTOM MAP MARKERS ── */
-.map-pin{display:flex;flex-direction:column;align-items:center;cursor:pointer}
-.pin-bubble{padding:4px 8px;border-radius:10px;font-size:10px;font-weight:700;color:#fff;white-space:nowrap;position:relative;line-height:1.3}
-.pin-bubble::after{content:'';position:absolute;bottom:-5px;left:50%;transform:translateX(-50%);border:3px solid transparent;border-top-width:5px}
-.pin-kr .pin-bubble{background:#E53E3E} .pin-kr .pin-bubble::after{border-top-color:#E53E3E}
-.pin-cn .pin-bubble{background:#C53030} .pin-cn .pin-bubble::after{border-top-color:#C53030}
-.pin-jp .pin-bubble{background:#553C9A} .pin-jp .pin-bubble::after{border-top-color:#553C9A}
-.pin-sg .pin-bubble{background:#2B6CB0} .pin-sg .pin-bubble::after{border-top-color:#2B6CB0}
-.pin-la .pin-bubble{background:#276749} .pin-la .pin-bubble::after{border-top-color:#276749}
-.pin-multi .pin-bubble{background:#B7791F} .pin-multi .pin-bubble::after{border-top-color:#B7791F}
-.pin-dot-sm{width:10px;height:10px;border-radius:50%;background:#fff;border:2px solid currentColor;margin-top:1px}
-
-/* ── BOTTOM SHEET ── */
-.bsheet{position:absolute;bottom:0;left:0;right:0;z-index:20;background:#fff;border-radius:16px 16px 0 0;padding-bottom:var(--safe-bot);transform:translateY(100%);transition:transform .35s cubic-bezier(.32,1,.32,1);max-height:70dvh;display:flex;flex-direction:column}
-.bsheet.open{transform:translateY(0)}
-.bsheet-handle{width:36px;height:4px;background:#d1d5db;border-radius:2px;margin:10px auto 6px}
-.bsheet-list{overflow-y:auto;flex:1;scrollbar-width:none}
-.bsheet-list::-webkit-scrollbar{display:none}
-.bsheet-count{font-size:12px;color:var(--muted);padding:0 16px 8px;font-weight:500}
-
-/* Place card in bottom sheet */
-.place-card{display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid #f3f4f6;cursor:pointer;transition:background .1s}
-.place-card:active{background:#fef5f5}
-.place-icon{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
-.place-info{flex:1;min-width:0}
-.place-name{font-size:14px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.place-meta{font-size:12px;color:var(--muted);margin-top:2px}
-.place-right{text-align:right;flex-shrink:0}
-.place-flags{font-size:14px;letter-spacing:1px;line-height:1}
-.place-dist{font-size:11px;color:var(--muted);margin-top:2px}
-.badge-open{font-size:10px;background:#dcfce7;color:#166534;padding:1px 6px;border-radius:6px;font-weight:600;display:inline-block;margin-top:2px}
-.badge-closed{font-size:10px;background:#fee2e2;color:#991b1b;padding:1px 6px;border-radius:6px;font-weight:600;display:inline-block;margin-top:2px}
-
-/* ── DETAIL SCREEN ── */
-.detail-appbar{background:var(--red);padding:10px 16px 12px;display:flex;align-items:center;gap:10px;color:#fff;flex-shrink:0}
-.back-btn{background:rgba(255,255,255,.2);border:none;border-radius:50%;width:34px;height:34px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff;flex-shrink:0}
-.back-btn:active{background:rgba(255,255,255,.3)}
-.detail-body{flex:1;overflow-y:auto;scrollbar-width:none;background:var(--bg)}
-.detail-body::-webkit-scrollbar{display:none}
-.detail-hero{background:#fff;padding:20px 16px 16px;margin-bottom:8px}
-.detail-icon-big{width:60px;height:60px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:28px;margin-bottom:12px}
-.detail-name{font-size:20px;font-weight:700;color:var(--text);margin-bottom:4px}
-.detail-type{font-size:13px;color:var(--muted);margin-bottom:10px}
-.detail-flags{font-size:22px;letter-spacing:4px;margin-bottom:10px}
-.lang-tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:4px}
-.lang-tag{padding:3px 10px;border-radius:8px;font-size:11px;font-weight:700}
-.lt-kr{background:#EBF8FF;color:#2B6CB0}
-.lt-cn{background:#FFF5F5;color:#C53030}
-.lt-jp{background:#FAF5FF;color:#553C9A}
-.lt-la{background:#F0FFF4;color:#276749}
-.lt-en{background:#FFFBEB;color:#92400E}
-.lt-vn{background:#FFF5F5;color:#E53E3E}
-.detail-section{background:#fff;margin-bottom:8px;padding:0 16px}
-.detail-section-title{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;padding:12px 0 6px;border-bottom:1px solid var(--border)}
-.info-row{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid #f3f4f6;font-size:13px}
-.info-row:last-child{border:none}
-.info-icon{font-size:16px;flex-shrink:0;width:20px;text-align:center;margin-top:1px}
-.info-label{color:var(--muted);font-size:11px;margin-bottom:2px}
-.info-val{color:var(--text);font-weight:500}
-.action-row{display:flex;gap:8px;padding:12px 16px;background:#fff;margin-bottom:8px}
-.act-btn{flex:1;padding:11px;border-radius:10px;font-size:13px;font-weight:700;border:none;cursor:pointer;font-family:inherit;transition:opacity .15s}
-.act-btn:active{opacity:.75}
-.act-primary{background:var(--red);color:#fff}
-.act-sec{background:var(--bg);color:var(--text);border:1px solid var(--border)}
-.qr-hint{background:#fffbeb;border-radius:10px;padding:12px;margin:0 16px 12px;font-size:12px;color:#92400E;display:flex;gap:8px;align-items:flex-start}
-
-/* ── LIST SCREEN ── */
-.list-body{flex:1;overflow-y:auto;scrollbar-width:none}
-.list-body::-webkit-scrollbar{display:none}
-.list-section-header{padding:7px 16px 5px;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;background:var(--bg);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:1}
-
-/* ── SCAN SCREEN ── */
-.scan-area{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#1a1a2e;padding:32px 24px;gap:20px}
-.scan-frame{width:220px;height:220px;border-radius:16px;border:3px solid var(--red);position:relative;display:flex;align-items:center;justify-content:center}
-.scan-corner{position:absolute;width:24px;height:24px;border-color:var(--red);border-style:solid;border-width:0}
-.sc-tl{top:-2px;left:-2px;border-top-width:4px;border-left-width:4px;border-radius:4px 0 0 0}
-.sc-tr{top:-2px;right:-2px;border-top-width:4px;border-right-width:4px;border-radius:0 4px 0 0}
-.sc-bl{bottom:-2px;left:-2px;border-bottom-width:4px;border-left-width:4px;border-radius:0 0 0 4px}
-.sc-br{bottom:-2px;right:-2px;border-bottom-width:4px;border-right-width:4px;border-radius:0 0 4px 0}
-.scan-line{position:absolute;left:10px;right:10px;height:2px;background:var(--red);animation:scanline 2s linear infinite}
-@keyframes scanline{0%{top:10px}100%{top:calc(100% - 10px)}}
-.scan-hint{color:rgba(255,255,255,.8);font-size:14px;text-align:center;line-height:1.6}
-.scan-result{background:#fff;border-radius:14px;padding:16px;width:100%}
-.scan-result-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px}
-.scan-tags{display:flex;gap:6px;flex-wrap:wrap}
-
-/* ── SAVED SCREEN ── */
-.saved-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:40px;color:var(--muted)}
-.saved-empty .big-icon{font-size:56px}
-.saved-empty p{font-size:14px;text-align:center;line-height:1.6}
-
-/* ── NAVBAR ── */
-.navbar{background:#fff;border-top:1px solid var(--border);display:flex;padding-bottom:var(--safe-bot);flex-shrink:0;z-index:30}
-.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 0 6px;font-size:10px;color:var(--muted);background:none;border:none;cursor:pointer;font-family:inherit;transition:color .15s;position:relative}
-.nav-btn.active{color:var(--red)}
-.nav-btn:active{opacity:.7}
-.nav-icon-wrap{position:relative;display:inline-flex}
-.nav-badge{position:absolute;top:-3px;right:-5px;background:var(--red);color:#fff;font-size:9px;font-weight:700;padding:0 4px;border-radius:8px;min-width:15px;text-align:center;line-height:15px}
-.nav-icon{font-size:22px}
-
-/* ── TOAST ── */
-#toast{position:absolute;bottom:calc(var(--safe-bot) + 80px);left:50%;transform:translateX(-50%) translateY(20px);background:#1a1a2e;color:#fff;padding:10px 18px;border-radius:24px;font-size:13px;opacity:0;transition:all .3s;z-index:100;white-space:nowrap;pointer-events:none}
+#bs{flex:1;background:#fff;display:flex;flex-direction:column;overflow:hidden;border-top:1px solid var(--bdr)}
+.bs-handle{display:none}
+#bsCount{font-size:12px;color:var(--sub);padding:8px 15px 5px;font-weight:600;flex-shrink:0;border-bottom:1px solid var(--bdr);background:#fff}
+#bsList{overflow-y:auto;flex:1;scrollbar-width:none}
+#bsList::-webkit-scrollbar{display:none}
+.pc{display:flex;align-items:center;gap:11px;padding:10px 15px;border-bottom:1px solid #f3f4f6;cursor:pointer}
+.pc:active{background:#fff5f5}
+.pc-ico{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.pc-info{flex:1;min-width:0}
+.pc-name{font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pc-meta{font-size:11px;color:var(--sub);margin-top:2px}
+.pc-r{text-align:right;flex-shrink:0}
+.pc-flags{font-size:13px;letter-spacing:1px}
+.bo{font-size:10px;padding:1px 6px;border-radius:5px;font-weight:600;display:inline-block;margin-top:2px}
+.bo.op{background:#dcfce7;color:#166534}
+.bo.cl{background:#fee2e2;color:#991b1b}
+.scr{position:absolute;inset:0;display:flex;flex-direction:column;background:#fff;z-index:20;transition:transform .28s ease,opacity .28s}
+.scr.off{transform:translateX(100%);opacity:0;pointer-events:none}
+.det-body{flex:1;overflow-y:auto;background:var(--bg);scrollbar-width:none}
+.det-body::-webkit-scrollbar{display:none}
+.det-hero{background:#fff;padding:18px 16px 14px;margin-bottom:8px}
+.det-ico{width:56px;height:56px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;margin-bottom:10px}
+.det-name{font-size:18px;font-weight:700;color:var(--text);margin-bottom:3px}
+.det-type{font-size:12px;color:var(--sub);margin-bottom:9px}
+.det-flags{font-size:20px;letter-spacing:4px;margin-bottom:9px}
+.ltags{display:flex;gap:5px;flex-wrap:wrap}
+.ltag{padding:3px 9px;border-radius:7px;font-size:11px;font-weight:700}
+.lko{background:#EBF8FF;color:#2B6CB0}.lcn{background:#FFF5F5;color:#C53030}
+.lja{background:#FAF5FF;color:#553C9A}.len{background:#FFFBEB;color:#92400E}
+.lvi{background:#FFF5F5;color:#E53E3E}.lth{background:#F0FFF4;color:#276749}
+.act-row{display:flex;gap:8px;padding:10px 15px;background:#fff;margin-bottom:8px}
+.abt{flex:1;padding:10px;border-radius:9px;font-size:13px;font-weight:700;border:none;cursor:pointer;font-family:inherit}
+.abt:active{opacity:.75}
+.abt.p{background:var(--red);color:#fff}
+.abt.s{background:var(--bg);color:var(--text);border:1px solid var(--bdr)}
+.dsec{background:#fff;margin-bottom:8px;padding:0 15px}
+.dsec-t{font-size:10px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;padding:11px 0 5px;border-bottom:1px solid var(--bdr)}
+.irow{display:flex;align-items:flex-start;gap:11px;padding:9px 0;border-bottom:1px solid #f3f4f6;font-size:13px}
+.irow:last-child{border:none}
+.ii{font-size:15px;width:20px;text-align:center;flex-shrink:0;margin-top:1px}
+.il{color:var(--sub);font-size:11px;margin-bottom:2px}
+.iv{color:var(--text);font-weight:500}
+.qhint{background:#fffbeb;border-radius:9px;padding:11px;margin:0 15px 12px;font-size:12px;color:#92400E;line-height:1.6}
+.lb{flex:1;overflow-y:auto;scrollbar-width:none}
+.lb::-webkit-scrollbar{display:none}
+.lsh{padding:6px 15px 4px;font-size:10px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;background:var(--bg);border-bottom:1px solid var(--bdr);position:sticky;top:0}
+.scan-area{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#1a1a2e;padding:28px 22px;gap:18px}
+.sf{width:200px;height:200px;border-radius:14px;border:3px solid var(--red);position:relative;display:flex;align-items:center;justify-content:center}
+.sc{position:absolute;width:22px;height:22px;border-color:var(--red);border-style:solid;border-width:0}
+.stl{top:-2px;left:-2px;border-top-width:4px;border-left-width:4px;border-radius:3px 0 0 0}
+.str{top:-2px;right:-2px;border-top-width:4px;border-right-width:4px;border-radius:0 3px 0 0}
+.sbl{bottom:-2px;left:-2px;border-bottom-width:4px;border-left-width:4px;border-radius:0 0 0 3px}
+.sbr{bottom:-2px;right:-2px;border-bottom-width:4px;border-right-width:4px;border-radius:0 0 3px 0}
+.sl{position:absolute;left:10px;right:10px;height:2px;background:var(--red);animation:sl 2s linear infinite}
+@keyframes sl{0%{top:10px}100%{top:calc(100% - 10px)}}
+.sh{color:rgba(255,255,255,.8);font-size:13px;text-align:center;line-height:1.6}
+.sr{background:#fff;border-radius:12px;padding:14px;width:100%}
+.sr-t{font-size:13px;font-weight:700;margin-bottom:7px}
+.sr-tags{display:flex;gap:5px;flex-wrap:wrap}
+.st{padding:3px 9px;border-radius:7px;font-size:11px;font-weight:700;background:#f0f4ff;color:#1a237e}
+.sbtn{padding:11px 26px;background:var(--red);color:#fff;border:none;border-radius:11px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit}
+.sbtn:active{background:var(--redd)}
+.sv-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:11px;padding:40px;color:var(--sub);text-align:center}
+.sv-empty .bi{font-size:52px}
+#ob{position:absolute;inset:0;background:#fff;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px 22px}
+.ob-flag{font-size:48px;margin-bottom:14px}
+.ob-h{font-size:22px;font-weight:800;color:var(--text);text-align:center;margin-bottom:7px}
+.ob-s{font-size:13px;color:var(--sub);text-align:center;line-height:1.6;margin-bottom:24px}
+.lg-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;width:100%;margin-bottom:22px}
+.lgb{padding:11px;border:2px solid var(--bdr);border-radius:11px;background:#fff;cursor:pointer;font-size:18px;display:flex;flex-direction:column;align-items:center;gap:3px;font-family:inherit;transition:all .15s}
+.lgb span{font-size:11px;font-weight:600;color:var(--sub)}
+.lgb.sel{border-color:var(--red);background:#fff5f5}
+.lgb.sel span{color:var(--red)}
+.stbtn{width:100%;padding:13px;background:var(--red);color:#fff;border:none;border-radius:13px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit}
+.stbtn:active{background:var(--redd)}
+.nav{background:#fff;border-top:1px solid var(--bdr);display:flex;flex-shrink:0;z-index:15}
+.nb{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:7px 0 6px;font-size:10px;color:var(--sub);background:none;border:none;cursor:pointer;font-family:inherit}
+.nb.on{color:var(--red)}
+.nb:active{opacity:.7}
+.nbi{font-size:21px}
+.nbdg{background:var(--red);color:#fff;font-size:9px;font-weight:700;padding:0 4px;border-radius:8px;min-width:14px;text-align:center;line-height:14px;display:none;margin-left:-6px;margin-top:-14px;position:relative;top:-2px}
+.bkb{background:rgba(255,255,255,.2);border:none;border-radius:50%;width:32px;height:32px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:17px;color:#fff;flex-shrink:0}
+.bkb:active{background:rgba(255,255,255,.3)}
+#toast{position:absolute;bottom:72px;left:50%;transform:translateX(-50%) translateY(10px);background:#1a1a2e;color:#fff;padding:9px 17px;border-radius:22px;font-size:12px;opacity:0;transition:all .25s;z-index:200;white-space:nowrap;pointer-events:none}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-
-/* ── LOADING ── */
-#loading{position:absolute;inset:0;background:var(--red);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:200;transition:opacity .5s}
-#loading.hidden{opacity:0;pointer-events:none}
-.loading-logo{width:72px;height:72px;border-radius:20px;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:36px;color:#fff;font-weight:900}
-.loading-title{font-size:22px;font-weight:800;color:#fff;letter-spacing:-.5px}
-.loading-sub{font-size:13px;color:rgba(255,255,255,.8)}
-.spinner{width:32px;height:32px;border:3px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-
-/* ── ONBOARDING ── */
-#onboard{position:absolute;inset:0;background:#fff;z-index:150;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;gap:0;transition:opacity .4s}
-#onboard.hidden{opacity:0;pointer-events:none}
-.onboard-flag{font-size:52px;margin-bottom:16px}
-.onboard-title{font-size:24px;font-weight:800;color:var(--text);text-align:center;margin-bottom:8px}
-.onboard-sub{font-size:14px;color:var(--muted);text-align:center;line-height:1.6;margin-bottom:28px}
-.lang-select-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;margin-bottom:24px}
-.lang-select-btn{padding:12px;border:2px solid var(--border);border-radius:12px;background:#fff;cursor:pointer;font-size:20px;display:flex;flex-direction:column;align-items:center;gap:4px;font-family:inherit;transition:all .15s}
-.lang-select-btn span{font-size:12px;font-weight:600;color:var(--muted)}
-.lang-select-btn.selected{border-color:var(--red);background:var(--red-light)}
-.lang-select-btn.selected span{color:var(--red)}
-.start-btn{width:100%;padding:14px;background:var(--red);color:#fff;border:none;border-radius:14px;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit}
-.start-btn:active{background:var(--red-dark)}
-
-/* ── UTIL ── */
-.hidden{display:none!important}
 </style>
 </head>
 <body>
-
 <div id="app">
 
-  <!-- LOADING SPLASH -->
-  <div id="loading">
-    <div class="loading-logo">VQ</div>
-    <div class="loading-title">VietQR Global</div>
-    <div class="loading-sub" id="loadingMsg">Đang khởi động...</div>
-    <div class="spinner" style="margin-top:8px"></div>
+  <!-- ONBOARDING -->
+  <div id="ob">
+    <div class="ob-flag">🌏</div>
+    <img src="data:image/png;base64,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" alt="VietQR Global" style="height:36px;width:auto;object-fit:contain;margin-bottom:4px"/>
+    <div class="ob-s">Chọn ngôn ngữ / Choose language / 언어 선택</div>
+    <div class="lg-grid">
+      <button class="lgb sel" data-l="ko" onclick="selLang('ko',this)">🇰🇷<span>한국어</span></button>
+      <button class="lgb" data-l="vi" onclick="selLang('vi',this)">🇻🇳<span>Tiếng Việt</span></button>
+      <button class="lgb" data-l="zh" onclick="selLang('zh',this)">🇨🇳<span>中文</span></button>
+      <button class="lgb" data-l="ja" onclick="selLang('ja',this)">🇯🇵<span>日本語</span></button>
+      <button class="lgb" data-l="en" onclick="selLang('en',this)">🇬🇧<span>English</span></button>
+      <button class="lgb" data-l="th" onclick="selLang('th',this)">🇹🇭<span>ภาษาไทย</span></button>
+    </div>
+    <button class="stbtn" id="stbtn" onclick="startApp()">시작하기 →</button>
   </div>
 
-  <!-- ONBOARDING: chọn ngôn ngữ -->
-  <div id="onboard" class="hidden">
-    <div class="onboard-flag">🌏</div>
-    <div class="onboard-title" id="obTitle">Chào mừng!</div>
-    <div class="onboard-sub" id="obSub">Chọn ngôn ngữ của bạn để bắt đầu tìm điểm thanh toán VietQR Global tại Việt Nam.</div>
-    <div class="lang-select-grid">
-      <button class="lang-select-btn" data-lang="vi" onclick="selectLang('vi',this)">🇻🇳<span>Tiếng Việt</span></button>
-      <button class="lang-select-btn selected" data-lang="ko" onclick="selectLang('ko',this)">🇰🇷<span>한국어</span></button>
-      <button class="lang-select-btn" data-lang="zh" onclick="selectLang('zh',this)">🇨🇳<span>中文</span></button>
-      <button class="lang-select-btn" data-lang="ja" onclick="selectLang('ja',this)">🇯🇵<span>日本語</span></button>
-      <button class="lang-select-btn" data-lang="en" onclick="selectLang('en',this)">🇬🇧<span>English</span></button>
-      <button class="lang-select-btn" data-lang="th" onclick="selectLang('th',this)">🇹🇭<span>ภาษาไทย</span></button>
+  <!-- APPBAR (hidden until lang selected) -->
+  <div class="ab" id="mainAb" style="display:none">
+    <div class="ab-row">
+      <img src="data:image/png;base64,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" class="logo-img" alt="VietQR Global" style="height:28px;width:auto;object-fit:contain;flex-shrink:0"/>
+      <div style="flex:1;margin-left:4px"><div class="ab-sub" id="abSub"></div></div>
+      <button class="ib" onclick="openLangPick()" id="lgFlag" style="font-size:22px">🇰🇷</button>
     </div>
-    <button class="start-btn" id="startBtn" onclick="startApp()">시작하기 →</button>
-  </div>
-
-  <!-- SCREEN: MAP -->
-  <div class="screen" id="screenMap">
-    <div class="sb"></div>
-    <div class="appbar">
-      <div class="appbar-row">
-        <div class="app-logo">VQ</div>
-        <div>
-          <div class="appbar-row" style="gap:6px">
-            <h1 id="appTitle">VietQR Global</h1>
-          </div>
-          <div class="appbar-sub" id="appSubtitle">근처 결제 가능 매장 찾기</div>
-        </div>
-        <button class="icon-btn" onclick="openLangPicker()" aria-label="Language" id="langFlag" style="font-size:22px">🇰🇷</button>
-      </div>
-      <div class="search-wrap">
-        <span style="font-size:16px;color:rgba(255,255,255,.7)">🔍</span>
-        <input id="searchInput" type="text" placeholder="..." oninput="onSearchInput()" autocomplete="off"/>
-        <button id="clearSearchBtn" onclick="clearSearch()">✕</button>
-      </div>
-    </div>
-
-    <div class="filter-bar" id="filterBar">
-      <div class="chip active" data-qr="all" onclick="setQRFilter('all',this)">🌏 All</div>
-      <div class="chip" data-qr="kr" onclick="setQRFilter('kr',this)">🇰🇷 한국</div>
-      <div class="chip" data-qr="cn" onclick="setQRFilter('cn',this)">🇨🇳 中国</div>
-      <div class="chip" data-qr="jp" onclick="setQRFilter('jp',this)">🇯🇵 日本</div>
-      <div class="chip" data-qr="sg" onclick="setQRFilter('sg',this)">🇸🇬 SG</div>
-      <div class="chip" data-qr="la" onclick="setQRFilter('la',this)">🇱🇦🇰🇭</div>
-      <div class="chip" data-qr="th" onclick="setQRFilter('th',this)">🇹🇭 TH</div>
-    </div>
-
-    <div id="map"></div>
-
-    <div class="map-fab-group">
-      <button class="fab" onclick="locateMe()" aria-label="My location" title="My location">📍</button>
-      <button class="fab" onclick="refreshNearby()" aria-label="Refresh" title="Refresh">🔄</button>
-    </div>
-
-    <div class="bsheet" id="bottomSheet">
-      <div class="bsheet-handle"></div>
-      <div class="bsheet-count" id="bsheetCount"></div>
-      <div class="bsheet-list" id="bsheetList"></div>
+    <div class="srch">
+      <span style="font-size:15px;color:rgba(255,255,255,.65)">🔍</span>
+      <input id="si" type="text" placeholder="" oninput="onSrch()" autocomplete="off"/>
+      <button id="clrBtn" onclick="clrSrch()">✕</button>
     </div>
   </div>
 
-  <!-- SCREEN: DETAIL -->
-  <div class="screen hidden" id="screenDetail">
-    <div class="sb" style="background:var(--red)"></div>
-    <div class="detail-appbar">
-      <button class="back-btn" onclick="goBack()" aria-label="Back">←</button>
-      <span style="font-size:15px;font-weight:700;flex:1" id="detailAppbarTitle">Chi tiết</span>
-    </div>
-    <div class="detail-body" id="detailBody"></div>
+  <div class="chips" id="qrChips" style="display:none">
+    <div class="chip on" onclick="setQR('all',this)">🌏 All</div>
+    <div class="chip" onclick="setQR('kr',this)">🇰🇷 한국</div>
+    <div class="chip" onclick="setQR('cn',this)">🇨🇳 中国</div>
+    <div class="chip" onclick="setQR('jp',this)">🇯🇵 日本</div>
+    <div class="chip" onclick="setQR('sg',this)">🇸🇬 SG</div>
+    <div class="chip" onclick="setQR('la',this)">🇱🇦🇰🇭</div>
+    <div class="chip" onclick="setQR('th',this)">🇹🇭 TH</div>
   </div>
 
-  <!-- SCREEN: LIST -->
-  <div class="screen hidden" id="screenList">
-    <div class="sb"></div>
-    <div class="appbar">
-      <div class="appbar-row">
-        <div class="app-logo">VQ</div>
-        <div style="flex:1">
-          <h1 id="listTitle">근처 매장</h1>
-          <div class="appbar-sub" id="listSub">...</div>
-        </div>
-      </div>
-      <div class="search-wrap" style="margin-top:10px">
-        <span style="font-size:16px;color:rgba(255,255,255,.7)">🔍</span>
-        <input id="listSearch" type="text" placeholder="..." oninput="filterList()" autocomplete="off"/>
-      </div>
+  <!-- SVG MAP -->
+  <div id="mapWrap" style="display:none">
+    <svg id="mapSvg" viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" style="width:100%;height:100%" xmlns="http://www.w3.org/2000/svg">
+      <rect width="400" height="300" fill="#dce8f0"/>
+      <rect x="0" y="140" width="400" height="7" fill="#fff" opacity=".7"/>
+      <rect x="0" y="80" width="400" height="5" fill="#fff" opacity=".5"/>
+      <rect x="0" y="210" width="400" height="5" fill="#fff" opacity=".5"/>
+      <rect x="115" y="0" width="6" height="300" fill="#fff" opacity=".7"/>
+      <rect x="235" y="0" width="5" height="300" fill="#fff" opacity=".5"/>
+      <rect x="335" y="0" width="4" height="300" fill="#fff" opacity=".4"/>
+      <rect x="125" y="92" width="100" height="40" rx="3" fill="#c8d8e8" opacity=".5"/>
+      <rect x="245" y="92" width="80" height="40" rx="3" fill="#c8d8e8" opacity=".5"/>
+      <rect x="125" y="155" width="100" height="45" rx="3" fill="#c8d8e8" opacity=".5"/>
+      <rect x="8" y="92" width="100" height="40" rx="3" fill="#c8d8e8" opacity=".4"/>
+      <rect x="8" y="155" width="100" height="45" rx="3" fill="#c8d8e8" opacity=".4"/>
+      <rect x="245" y="155" width="80" height="45" rx="3" fill="#c8d8e8" opacity=".4"/>
+      <ellipse cx="355" cy="250" rx="48" ry="33" fill="#a8c8e8" opacity=".4"/>
+      <rect x="245" y="220" width="78" height="58" rx="5" fill="#b8d8a8" opacity=".5"/>
+      <circle cx="195" cy="143" r="9" fill="#E53E3E" opacity=".2"/>
+      <circle cx="195" cy="143" r="5.5" fill="#E53E3E" stroke="#fff" stroke-width="2.5"/>
+      <g id="pins"></g>
+    </svg>
+    <div class="mfabs">
+      <button class="fab" onclick="toggleMap()" id="toggleMapBtn" title="Toggle map size">⬆️</button>
+      <button class="fab" onclick="locateMe()">📍</button>
+      <button class="fab" onclick="doRefresh()">🔄</button>
     </div>
-    <div class="filter-bar" id="filterBar2">
-      <div class="chip active" data-cat="all" onclick="setCatFilter('all',this)">전체</div>
-      <div class="chip" data-cat="cafe" onclick="setCatFilter('cafe',this)">☕ 카페</div>
-      <div class="chip" data-cat="restaurant" onclick="setCatFilter('restaurant',this)">🍽️ 식당</div>
-      <div class="chip" data-cat="shopping" onclick="setCatFilter('shopping',this)">🛒 쇼핑</div>
-      <div class="chip" data-cat="hotel" onclick="setCatFilter('hotel',this)">🏨 호텔</div>
-      <div class="chip" data-cat="pharmacy" onclick="setCatFilter('pharmacy',this)">💊 약국</div>
-    </div>
-    <div class="list-body" id="listBody"></div>
   </div>
 
-  <!-- SCREEN: SCAN -->
-  <div class="screen hidden" id="screenScan">
-    <div class="sb" style="background:#1a1a2e"></div>
-    <div class="appbar" style="background:#1a1a2e">
-      <div class="appbar-row">
-        <div class="app-logo" style="background:rgba(255,255,255,.1)">📷</div>
-        <h1 id="scanTitle">QR 스캔</h1>
-      </div>
+  <div id="bs" style="display:none">
+    <div id="bsCount"></div>
+    <div id="bsList"></div>
+  </div>
+
+  <!-- DETAIL -->
+  <div class="scr off" id="scrDet">
+    <div class="ab"><div class="ab-row"><button class="bkb" onclick="goBack()">←</button><h1 id="detT" style="font-size:14px">Detail</h1></div></div>
+    <div class="det-body" id="detBody"></div>
+  </div>
+
+  <!-- LIST -->
+  <div class="scr off" id="scrList">
+    <div class="ab">
+      <div class="ab-row"><div class="ab-logo">📋</div><div style="flex:1"><h1 id="listT">Nearby</h1><div class="ab-sub" id="listSub"></div></div></div>
+      <div class="srch" style="margin-top:9px"><span style="font-size:15px;color:rgba(255,255,255,.65)">🔍</span><input id="lsi" type="text" placeholder="" oninput="renderList()" autocomplete="off"/></div>
     </div>
+    <div class="chips" id="catChips">
+      <div class="chip on" onclick="setCat('all',this)">All</div>
+      <div class="chip" onclick="setCat('cafe',this)">☕</div>
+      <div class="chip" onclick="setCat('restaurant',this)">🍽️</div>
+      <div class="chip" onclick="setCat('shopping',this)">🛒</div>
+      <div class="chip" onclick="setCat('hotel',this)">🏨</div>
+      <div class="chip" onclick="setCat('pharmacy',this)">💊</div>
+    </div>
+    <div class="lb" id="listBody"></div>
+  </div>
+
+  <!-- SCAN -->
+  <div class="scr off" id="scrScan">
+    <div class="ab" style="background:#1a1a2e"><div class="ab-row"><div class="ab-logo" style="background:rgba(255,255,255,.1)">📷</div><h1 id="scanT">QR Scan</h1></div></div>
     <div class="scan-area">
-      <div class="scan-frame">
-        <div class="scan-corner sc-tl"></div>
-        <div class="scan-corner sc-tr"></div>
-        <div class="scan-corner sc-bl"></div>
-        <div class="scan-corner sc-br"></div>
-        <div class="scan-line"></div>
-        <span style="font-size:48px">📱</span>
-      </div>
-      <div class="scan-hint" id="scanHint">QR코드를 프레임 안에 맞춰주세요<br><small style="opacity:.7;font-size:11px">VietQR, UnionPay, Alipay, WeChat Pay 지원</small></div>
-      <div class="scan-result" id="scanResult" style="display:none">
-        <div class="scan-result-title" id="scanResultTitle"></div>
-        <div class="scan-tags" id="scanResultTags"></div>
-      </div>
-      <button onclick="simulateScan()" style="padding:12px 28px;background:var(--red);color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">
-        QR 스캔 시뮬레이션
-      </button>
+      <div class="sf"><div class="sc stl"></div><div class="sc str"></div><div class="sc sbl"></div><div class="sc sbr"></div><div class="sl"></div><span style="font-size:44px">📱</span></div>
+      <div class="sh" id="scanH">QR코드를 프레임 안에 맞춰주세요<br><small style="opacity:.65;font-size:11px">VietQR · UnionPay · Alipay · WeChat Pay</small></div>
+      <div class="sr" id="scanR" style="display:none"><div class="sr-t" id="srT"></div><div class="sr-tags" id="srTags"></div></div>
+      <button class="sbtn" onclick="doScan()">QR Scan Demo</button>
     </div>
   </div>
 
-  <!-- SCREEN: SAVED -->
-  <div class="screen hidden" id="screenSaved">
-    <div class="sb"></div>
-    <div class="appbar">
-      <div class="appbar-row">
-        <div class="app-logo">⭐</div>
-        <h1 id="savedTitle">저장된 장소</h1>
-      </div>
-    </div>
-    <div id="savedContent" style="flex:1;overflow-y:auto;background:var(--bg)"></div>
+  <!-- SAVED -->
+  <div class="scr off" id="scrSaved">
+    <div class="ab"><div class="ab-row"><div class="ab-logo">⭐</div><h1 id="savedT">Saved</h1></div></div>
+    <div id="savedBody" style="flex:1;overflow-y:auto;background:var(--bg);scrollbar-width:none"></div>
   </div>
 
-  <!-- NAVBAR -->
-  <nav class="navbar" id="navbar">
-    <button class="nav-btn active" id="navMap" onclick="navTo('Map')">
-      <div class="nav-icon-wrap"><span class="nav-icon">🗺️</span></div>
-      <span id="navLabelMap">지도</span>
-    </button>
-    <button class="nav-btn" id="navList" onclick="navTo('List')">
-      <div class="nav-icon-wrap"><span class="nav-icon">📋</span></div>
-      <span id="navLabelList">목록</span>
-    </button>
-    <button class="nav-btn" id="navScan" onclick="navTo('Scan')">
-      <div class="nav-icon-wrap"><span class="nav-icon">📷</span></div>
-      <span id="navLabelScan">스캔</span>
-    </button>
-    <button class="nav-btn" id="navSaved" onclick="navTo('Saved')">
-      <div class="nav-icon-wrap">
-        <span class="nav-icon">⭐</span>
-        <span class="nav-badge hidden" id="savedBadge">0</span>
-      </div>
-      <span id="navLabelSaved">저장</span>
-    </button>
+  <!-- NAV (hidden until start) -->
+  <nav class="nav" id="nav" style="display:none">
+    <button class="nb on" id="nbMap" onclick="navTo('Map')"><span class="nbi">🗺️</span><span id="nlMap">Map</span></button>
+    <button class="nb" id="nbList" onclick="navTo('List')"><span class="nbi">📋</span><span id="nlList">List</span></button>
+    <button class="nb" id="nbScan" onclick="navTo('Scan')"><span class="nbi">📷</span><span id="nlScan">Scan</span></button>
+    <button class="nb" id="nbSaved" onclick="navTo('Saved')"><span class="nbi">⭐</span><span class="nbdg" id="svBdg">0</span><span id="nlSaved">Saved</span></button>
   </nav>
 
   <div id="toast"></div>
 </div>
 
 <script>
-// ═══════════════════════════════════════════════════════════
-//  I18N
-// ═══════════════════════════════════════════════════════════
-const I18N = {
-  vi:{
-    appSubtitle:"Tìm điểm thanh toán VietQR Global",
-    searchPlaceholder:"Tìm quán cà phê, nhà hàng...",
-    navMap:"Bản đồ",navList:"Danh sách",navScan:"Quét QR",navSaved:"Đã lưu",
-    open:"Mở cửa",closed:"Đóng cửa",
-    nearby:"Gần bạn",places:"địa điểm",
-    directions:"Chỉ đường",save:"Lưu",share:"Chia sẻ",
-    saved:"Đã lưu",unsave:"Bỏ lưu",
-    scanTitle:"Quét QR",
-    scanHint:"Đặt mã QR vào khung để xác nhận loại thanh toán",
-    savedTitle:"Địa điểm đã lưu",
-    listTitle:"Gần bạn",
-    noSaved:"Chưa có địa điểm nào được lưu.\nNhấn ⭐ trong chi tiết địa điểm để lưu.",
-    detailTitle:"Chi tiết",
-    address:"Địa chỉ",hours:"Giờ mở cửa",phone:"Điện thoại",payment:"Thanh toán",
-    qrNote:"💡 Mã QR này hỗ trợ thanh toán từ các ứng dụng ngân hàng của các quốc gia được liệt kê.",
-    locating:"Đang định vị...",locFailed:"Không thể lấy vị trí. Vui lòng cấp quyền.",
-    filterAll:"Tất cả",
-  },
-  ko:{
-    appSubtitle:"근처 VietQR Global 결제 가능 매장",
-    searchPlaceholder:"카페, 식당 검색...",
-    navMap:"지도",navList:"목록",navScan:"스캔",navSaved:"저장",
-    open:"영업중",closed:"영업종료",
-    nearby:"내 주변",places:"개 매장",
-    directions:"길 안내",save:"저장",share:"공유",
-    saved:"저장됨",unsave:"저장 취소",
-    scanTitle:"QR 스캔",
-    scanHint:"QR코드를 프레임 안에 맞춰주세요",
-    savedTitle:"저장된 장소",
-    listTitle:"근처 매장",
-    noSaved:"저장된 장소가 없습니다.\n상세 페이지에서 ⭐를 눌러 저장하세요.",
-    detailTitle:"상세 정보",
-    address:"주소",hours:"영업시간",phone:"전화",payment:"결제 수단",
-    qrNote:"💡 이 QR코드는 나열된 국가의 뱅킹 앱으로 결제 가능합니다.",
-    locating:"위치 확인 중...",locFailed:"위치를 가져올 수 없습니다. 권한을 허용해주세요.",
-    filterAll:"전체",
-  },
-  zh:{
-    appSubtitle:"查找支持VietQR Global的商家",
-    searchPlaceholder:"搜索咖啡厅、餐厅...",
-    navMap:"地图",navList:"列表",navScan:"扫码",navSaved:"收藏",
-    open:"营业中",closed:"已关闭",
-    nearby:"附近",places:"家门店",
-    directions:"导航",save:"收藏",share:"分享",
-    saved:"已收藏",unsave:"取消收藏",
-    scanTitle:"扫描QR码",
-    scanHint:"将QR码对准框内",
-    savedTitle:"已收藏地点",
-    listTitle:"附近门店",
-    noSaved:"暂无收藏地点。\n在详情页点击⭐进行收藏。",
-    detailTitle:"详细信息",
-    address:"地址",hours:"营业时间",phone:"电话",payment:"支付方式",
-    qrNote:"💡 此QR码支持所列国家的银行APP付款。",
-    locating:"正在定位...",locFailed:"无法获取位置，请允许定位权限。",
-    filterAll:"全部",
-  },
-  ja:{
-    appSubtitle:"VietQR Global対応店舗を探す",
-    searchPlaceholder:"カフェ、レストランを検索...",
-    navMap:"地図",navList:"リスト",navScan:"スキャン",navSaved:"保存",
-    open:"営業中",closed:"閉店",
-    nearby:"近く",places:"店舗",
-    directions:"案内",save:"保存",share:"共有",
-    saved:"保存済み",unsave:"保存解除",
-    scanTitle:"QRスキャン",
-    scanHint:"QRコードをフレーム内に合わせてください",
-    savedTitle:"保存した場所",
-    listTitle:"近くのお店",
-    noSaved:"保存された場所はありません。\n詳細ページで⭐をタップして保存。",
-    detailTitle:"詳細",
-    address:"住所",hours:"営業時間",phone:"電話",payment:"支払い方法",
-    qrNote:"💡 このQRコードは一覧の国のバンクアプリで決済可能です。",
-    locating:"位置確認中...",locFailed:"位置情報を取得できません。許可してください。",
-    filterAll:"すべて",
-  },
-  en:{
-    appSubtitle:"Find VietQR Global payment spots",
-    searchPlaceholder:"Search cafes, restaurants...",
-    navMap:"Map",navList:"List",navScan:"Scan",navSaved:"Saved",
-    open:"Open",closed:"Closed",
-    nearby:"Nearby",places:"places",
-    directions:"Directions",save:"Save",share:"Share",
-    saved:"Saved",unsave:"Unsave",
-    scanTitle:"QR Scan",
-    scanHint:"Align QR code within the frame",
-    savedTitle:"Saved Places",
-    listTitle:"Nearby",
-    noSaved:"No saved places yet.\nTap ⭐ on a place detail to save it.",
-    detailTitle:"Details",
-    address:"Address",hours:"Hours",phone:"Phone",payment:"Payment",
-    qrNote:"💡 This QR supports payment from banking apps of the listed countries.",
-    locating:"Locating...",locFailed:"Cannot get location. Please allow permission.",
-    filterAll:"All",
-  },
-  th:{
-    appSubtitle:"ค้นหาร้านที่รับ VietQR Global",
-    searchPlaceholder:"ค้นหาคาเฟ่ ร้านอาหาร...",
-    navMap:"แผนที่",navList:"รายการ",navScan:"สแกน",navSaved:"บันทึก",
-    open:"เปิด",closed:"ปิด",
-    nearby:"ใกล้ฉัน",places:"สถานที่",
-    directions:"นำทาง",save:"บันทึก",share:"แชร์",
-    saved:"บันทึกแล้ว",unsave:"ยกเลิก",
-    scanTitle:"สแกน QR",
-    scanHint:"วาง QR โค้ดในกรอบ",
-    savedTitle:"สถานที่บันทึก",
-    listTitle:"ใกล้ฉัน",
-    noSaved:"ยังไม่มีสถานที่บันทึก\nกด ⭐ ในหน้ารายละเอียดเพื่อบันทึก",
-    detailTitle:"รายละเอียด",
-    address:"ที่อยู่",hours:"เวลาทำการ",phone:"โทรศัพท์",payment:"การชำระเงิน",
-    qrNote:"💡 QR นี้รองรับแอปธนาคารจากประเทศที่ระบุ",
-    locating:"กำลังระบุตำแหน่ง...",locFailed:"ไม่สามารถรับตำแหน่งได้ กรุณาอนุญาต",
-    filterAll:"ทั้งหมด",
-  },
+const T={
+  vi:{sub:"Tìm điểm VietQR Global",sp:"Tìm quán...",nm:"Bản đồ",nl:"Danh sách",ns:"Quét QR",nv:"Đã lưu",op:"Mở",cl:"Đóng",dir:"Chỉ đường",sv:"Lưu",sh:"Chia sẻ",unsv:"Bỏ lưu",lt:"Gần bạn",ps:"địa điểm",noSv:"Chưa có.\nNhấn ⭐ để lưu.",qn:"💡 QR hỗ trợ thanh toán từ ứng dụng ngân hàng các quốc gia được liệt kê.",addr:"Địa chỉ",hrs:"Giờ",ph:"ĐT",pay:"Thanh toán",det:"Chi tiết",scanT:"Quét QR",scanH:"Đặt mã QR vào khung",stBtn:"Bắt đầu →"},
+  ko:{sub:"근처 VietQR Global 매장",sp:"카페, 식당 검색...",nm:"지도",nl:"목록",ns:"스캔",nv:"저장",op:"영업중",cl:"영업종료",dir:"길 안내",sv:"저장",sh:"공유",unsv:"저장취소",lt:"내 주변",ps:"개 매장",noSv:"저장된 장소가 없습니다.\n⭐를 눌러 저장하세요.",qn:"💡 이 QR은 나열된 국가의 뱅킹앱으로 결제 가능합니다.",addr:"주소",hrs:"영업시간",ph:"전화",pay:"결제수단",det:"상세정보",scanT:"QR 스캔",scanH:"QR코드를 프레임 안에 맞춰주세요",stBtn:"시작하기 →"},
+  zh:{sub:"查找VietQR Global商家",sp:"搜索咖啡厅...",nm:"地图",nl:"列表",ns:"扫码",nv:"收藏",op:"营业中",cl:"已关闭",dir:"导航",sv:"收藏",sh:"分享",unsv:"取消收藏",lt:"附近",ps:"家门店",noSv:"暂无收藏。\n点击⭐收藏。",qn:"💡 此QR支持所列国家银行APP付款。",addr:"地址",hrs:"营业时间",ph:"电话",pay:"支付方式",det:"详细信息",scanT:"扫描QR",scanH:"将QR码对准框内",stBtn:"开始 →"},
+  ja:{sub:"VietQR Global対応店舗",sp:"カフェ、レストランを検索...",nm:"地図",nl:"リスト",ns:"スキャン",nv:"保存",op:"営業中",cl:"閉店",dir:"案内",sv:"保存",sh:"共有",unsv:"保存解除",lt:"近く",ps:"店舗",noSv:"保存された場所はありません。\n⭐をタップして保存。",qn:"💡 このQRは一覧の国のバンクアプリで決済可能。",addr:"住所",hrs:"営業時間",ph:"電話",pay:"支払い方法",det:"詳細",scanT:"QRスキャン",scanH:"QRコードをフレームに合わせてください",stBtn:"始める →"},
+  en:{sub:"Find VietQR Global spots",sp:"Search cafes...",nm:"Map",nl:"List",ns:"Scan",nv:"Saved",op:"Open",cl:"Closed",dir:"Directions",sv:"Save",sh:"Share",unsv:"Unsave",lt:"Nearby",ps:"places",noSv:"No saved places.\nTap ⭐ to save.",qn:"💡 This QR supports payment from banking apps of listed countries.",addr:"Address",hrs:"Hours",ph:"Phone",pay:"Payment",det:"Details",scanT:"QR Scan",scanH:"Align QR code in the frame",stBtn:"Start →"},
+  th:{sub:"ค้นหาร้านที่รับ VietQR Global",sp:"ค้นหาคาเฟ่...",nm:"แผนที่",nl:"รายการ",ns:"สแกน",nv:"บันทึก",op:"เปิด",cl:"ปิด",dir:"นำทาง",sv:"บันทึก",sh:"แชร์",unsv:"ยกเลิก",lt:"ใกล้ฉัน",ps:"สถานที่",noSv:"ยังไม่มีที่บันทึก\nกด ⭐ เพื่อบันทึก",qn:"💡 QR นี้รองรับแอปธนาคารจากประเทศที่ระบุ",addr:"ที่อยู่",hrs:"เวลา",ph:"โทร",pay:"ชำระเงิน",det:"รายละเอียด",scanT:"สแกน QR",scanH:"วาง QR โค้ดในกรอบ",stBtn:"เริ่ม →"},
 };
-const LANG_FLAG = {vi:"🇻🇳",ko:"🇰🇷",zh:"🇨🇳",ja:"🇯🇵",en:"🇬🇧",th:"🇹🇭"};
-
-// ═══════════════════════════════════════════════════════════
-//  SAMPLE DATA — 30 places around HCM City
-// ═══════════════════════════════════════════════════════════
-const PLACES = [
-  {id:1,name:"Phúc Long Coffee & Tea",nameKo:"푹롱 커피",nameCn:"福隆咖啡",nameJa:"フックロン",
-   cat:"cafe",icon:"☕",
-   lat:10.7769,lng:106.7009,
-   address:"123 Xô Viết Nghệ Tĩnh, P.17, Q. Bình Thạnh",
-   hours:"07:00 – 22:30",phone:"028 3899 1234",
-   qr:["kr","cn","jp","sg"],lang:["ko","zh","en"],open:true,rating:4.5,reviews:312},
-  {id:2,name:"The Coffee House",nameKo:"더 커피 하우스",nameCn:"咖啡馆",
-   cat:"cafe",icon:"☕",
-   lat:10.7756,lng:106.7033,
-   address:"56 Nguyễn Đình Chiểu, Q.3",
-   hours:"07:00 – 23:00",phone:"1800 6936",
-   qr:["kr","sg"],lang:["ko","en"],open:true,rating:4.3,reviews:198},
-  {id:3,name:"Quán Bún Bò Huế Bà Tuyết",nameKo:"분보후에 식당",
-   cat:"restaurant",icon:"🍜",
-   lat:10.7744,lng:106.7058,
-   address:"88 Võ Thị Sáu, Q.3",
-   hours:"06:00 – 14:00",phone:"090 123 4567",
-   qr:["kr","sg","la"],lang:["ko","en"],open:true,rating:4.7,reviews:521},
-  {id:4,name:"Tokyo Sushi & BBQ",nameKo:"도쿄 스시 바베큐",
-   cat:"restaurant",icon:"🍣",
-   lat:10.7791,lng:106.6989,
-   address:"24 Đinh Tiên Hoàng, Q. Bình Thạnh",
-   hours:"11:00 – 22:00",phone:"028 3512 5678",
-   qr:["jp","kr","cn"],lang:["ja","ko","en"],open:false,rating:4.4,reviews:267},
-  {id:5,name:"Siêu thị GO! Bình Thạnh",nameKo:"GO! 마트",nameCn:"GO! 超市",
-   cat:"shopping",icon:"🛒",
-   lat:10.7812,lng:106.7041,
-   address:"Saigon Pearl, 92 Nguyễn Hữu Cảnh, Q. Bình Thạnh",
-   hours:"08:00 – 22:00",phone:"028 3898 8080",
-   qr:["kr","cn","jp","sg","la","th"],lang:["ko","zh","en"],open:true,rating:4.2,reviews:843},
-  {id:6,name:"Trung Nguyên Legend Café",nameKo:"쭝응우옌 커피",
-   cat:"cafe",icon:"☕",
-   lat:10.7732,lng:106.6977,
-   address:"58 Trường Sa, Q. Bình Thạnh",
-   hours:"06:30 – 22:00",phone:"028 3840 2929",
-   qr:["kr","cn","sg"],lang:["en","ko"],open:true,rating:4.6,reviews:445},
-  {id:7,name:"Nhà hàng Hải Sản Hoàng Ty",nameKo:"해산물 황티 레스토랑",
-   cat:"restaurant",icon:"🦞",
-   lat:10.7803,lng:106.7018,
-   address:"105 Đinh Tiên Hoàng, Q. Bình Thạnh",
-   hours:"10:00 – 22:30",phone:"028 3841 3456",
-   qr:["kr","cn","jp"],lang:["ko","zh","ja"],open:true,rating:4.5,reviews:334},
-  {id:8,name:"Vincom Center Landmark 81",nameKo:"빈컴 랜드마크 81",nameCn:"Vincom中心",
-   cat:"shopping",icon:"🏬",
-   lat:10.7948,lng:106.7218,
-   address:"720A Điện Biên Phủ, Q. Bình Thạnh",
-   hours:"09:30 – 22:00",phone:"028 3938 8888",
-   qr:["kr","cn","jp","sg","la","th"],lang:["ko","zh","ja","en"],open:true,rating:4.8,reviews:2341},
-  {id:9,name:"Khách sạn Liberty Central",nameKo:"리버티 센트럴 호텔",
-   cat:"hotel",icon:"🏨",
-   lat:10.7760,lng:106.7050,
-   address:"17 Tôn Đức Thắng, Q.1",
-   hours:"24/7",phone:"028 3827 1111",
-   qr:["kr","cn","jp","sg","th"],lang:["ko","zh","ja","en"],open:true,rating:4.6,reviews:1203},
-  {id:10,name:"Pharmacity Nguyễn Đình Chiểu",nameKo:"파마시티 약국",
-   cat:"pharmacy",icon:"💊",
-   lat:10.7748,lng:106.7029,
-   address:"45 Nguyễn Đình Chiểu, Q.3",
-   hours:"07:00 – 22:00",phone:"028 7107 9999",
-   qr:["kr","cn","sg"],lang:["en"],open:true,rating:4.1,reviews:89},
-  {id:11,name:"Bún Đậu Mắm Tôm Cô Liêu",nameKo:"분더우맘텀 식당",
-   cat:"restaurant",icon:"🍲",
-   lat:10.7721,lng:106.7065,
-   address:"22 Võ Văn Tần, Q.3",
-   hours:"10:00 – 21:00",phone:"090 987 6543",
-   qr:["kr"],lang:["ko","en"],open:true,rating:4.4,reviews:289},
-  {id:12,name:"Circle K (24h)",nameKo:"써클K 편의점",nameCn:"便利店",
-   cat:"shopping",icon:"🏪",
-   lat:10.7765,lng:106.7042,
-   address:"78 Đinh Tiên Hoàng, Q. Bình Thạnh",
-   hours:"24 giờ",phone:"",
-   qr:["kr","cn","jp","sg","la","th"],lang:["en"],open:true,rating:3.9,reviews:156},
-  {id:13,name:"Seoul BBQ & Beer",nameKo:"서울 바베큐 & 맥주",
-   cat:"restaurant",icon:"🥩",
-   lat:10.7785,lng:106.7001,
-   address:"33 Phan Văn Trị, Q. Bình Thạnh",
-   hours:"16:00 – 24:00",phone:"028 3553 7788",
-   qr:["kr","cn"],lang:["ko","zh"],open:true,rating:4.3,reviews:432},
-  {id:14,name:"Ramen Ichiban",nameKo:"라멘 이치반",nameJa:"ラーメン一番",
-   cat:"restaurant",icon:"🍜",
-   lat:10.7774,lng:106.7052,
-   address:"67 Nguyễn Hữu Cảnh, Q. Bình Thạnh",
-   hours:"11:00 – 22:00",phone:"028 3510 6767",
-   qr:["jp","kr"],lang:["ja","ko","en"],open:true,rating:4.5,reviews:377},
-  {id:15,name:"Lotteria Vincom",nameKo:"롯데리아 빈컴",
-   cat:"restaurant",icon:"🍔",
-   lat:10.7951,lng:106.7222,
-   address:"B1F Vincom Landmark 81",
-   hours:"09:30 – 22:00",phone:"028 3938 1234",
-   qr:["kr","cn","jp","sg"],lang:["ko","en"],open:true,rating:4.0,reviews:654},
+const FLAGS={vi:"🇻🇳",ko:"🇰🇷",zh:"🇨🇳",ja:"🇯🇵",en:"🇬🇧",th:"🇹🇭"};
+const QRC={kr:"🇰🇷",cn:"🇨🇳",jp:"🇯🇵",sg:"🇸🇬",la:"🇱🇦",kh:"🇰🇭",th:"🇹🇭"};
+const PINC={kr:"#E53E3E",cn:"#C53030",jp:"#553C9A",sg:"#2B6CB0",la:"#276749",th:"#D69E2E"};
+const PLACES=[
+  {id:1,name:"Phúc Long Coffee & Tea",ko:"푹롱 커피",zh:"福隆咖啡",ja:"フックロン",cat:"cafe",ico:"☕",lat:10.7769,lng:106.7009,addr:"123 Xô Viết Nghệ Tĩnh, Q.Bình Thạnh",hrs:"07:00–22:30",ph:"028 3899 1234",qr:["kr","cn","jp","sg"],lang:["ko","zh","en"],open:true,r:4.5,rv:312,sx:175,sy:140},
+  {id:2,name:"The Coffee House",ko:"더 커피 하우스",cat:"cafe",ico:"☕",lat:10.7756,lng:106.7033,addr:"56 Nguyễn Đình Chiểu, Q.3",hrs:"07:00–23:00",ph:"1800 6936",qr:["kr","sg"],lang:["ko","en"],open:true,r:4.3,rv:198,sx:240,sy:103},
+  {id:3,name:"Quán Bún Bò Huế",ko:"분보후에 식당",cat:"restaurant",ico:"🍜",lat:10.7744,lng:106.7058,addr:"88 Võ Thị Sáu, Q.3",hrs:"06:00–14:00",ph:"090 123 4567",qr:["kr","sg","la"],lang:["ko","en"],open:true,r:4.7,rv:521,sx:295,sy:162},
+  {id:4,name:"Tokyo Sushi & BBQ",ko:"도쿄 스시",ja:"東京寿司",cat:"restaurant",ico:"🍣",lat:10.7791,lng:106.6989,addr:"24 Đinh Tiên Hoàng, Q.BT",hrs:"11:00–22:00",ph:"028 3512 5678",qr:["jp","kr","cn"],lang:["ja","ko","en"],open:false,r:4.4,rv:267,sx:78,sy:118},
+  {id:5,name:"Siêu thị GO! Bình Thạnh",ko:"GO! 마트",zh:"GO! 超市",cat:"shopping",ico:"🛒",lat:10.7812,lng:106.7041,addr:"92 Nguyễn Hữu Cảnh, Q.BT",hrs:"08:00–22:00",ph:"028 3898 8080",qr:["kr","cn","jp","sg","la","th"],lang:["ko","zh","en"],open:true,r:4.2,rv:843,sx:215,sy:62},
+  {id:6,name:"Trung Nguyên Legend",ko:"쭝응우옌 커피",cat:"cafe",ico:"☕",lat:10.7732,lng:106.6977,addr:"58 Trường Sa, Q.BT",hrs:"06:30–22:00",ph:"028 3840 2929",qr:["kr","cn","sg"],lang:["en","ko"],open:true,r:4.6,rv:445,sx:48,sy:190},
+  {id:7,name:"Nhà hàng Hải Sản",ko:"해산물 식당",cat:"restaurant",ico:"🦞",lat:10.7803,lng:106.7018,addr:"105 Đinh Tiên Hoàng, Q.BT",hrs:"10:00–22:30",ph:"028 3841 3456",qr:["kr","cn","jp"],lang:["ko","zh","ja"],open:true,r:4.5,rv:334,sx:155,sy:75},
+  {id:8,name:"Vincom Landmark 81",ko:"빈컴 랜드마크81",zh:"Vincom购物中心",cat:"shopping",ico:"🏬",lat:10.7948,lng:106.7218,addr:"720A Điện Biên Phủ, Q.BT",hrs:"09:30–22:00",ph:"028 3938 8888",qr:["kr","cn","jp","sg","la","th"],lang:["ko","zh","ja","en"],open:true,r:4.8,rv:2341,sx:350,sy:208},
+  {id:9,name:"Liberty Central Hotel",ko:"리버티 센트럴 호텔",cat:"hotel",ico:"🏨",lat:10.776,lng:106.705,addr:"17 Tôn Đức Thắng, Q.1",hrs:"24/7",ph:"028 3827 1111",qr:["kr","cn","jp","sg","th"],lang:["ko","zh","ja","en"],open:true,r:4.6,rv:1203,sx:265,sy:183},
+  {id:10,name:"Pharmacity",ko:"파마시티 약국",cat:"pharmacy",ico:"💊",lat:10.7748,lng:106.7029,addr:"45 Nguyễn Đình Chiểu, Q.3",hrs:"07:00–22:00",ph:"028 7107 9999",qr:["kr","cn","sg"],lang:["en"],open:true,r:4.1,rv:89,sx:190,sy:195},
+  {id:11,name:"Bún Đậu Mắm Tôm",ko:"분더우맘텀",cat:"restaurant",ico:"🍲",lat:10.7721,lng:106.7065,addr:"22 Võ Văn Tần, Q.3",hrs:"10:00–21:00",ph:"090 987 6543",qr:["kr"],lang:["ko","en"],open:true,r:4.4,rv:289,sx:305,sy:232},
+  {id:12,name:"Circle K 24h",ko:"써클K",zh:"便利店",cat:"shopping",ico:"🏪",lat:10.7765,lng:106.7042,addr:"78 Đinh Tiên Hoàng, Q.BT",hrs:"24h",ph:"",qr:["kr","cn","jp","sg","la","th"],lang:["en"],open:true,r:3.9,rv:156,sx:228,sy:150},
+  {id:13,name:"Seoul BBQ & Beer",ko:"서울 바베큐",cat:"restaurant",ico:"🥩",lat:10.7785,lng:106.7001,addr:"33 Phan Văn Trị, Q.BT",hrs:"16:00–24:00",ph:"028 3553 7788",qr:["kr","cn"],lang:["ko","zh"],open:true,r:4.3,rv:432,sx:126,sy:107},
+  {id:14,name:"Ramen Ichiban",ko:"라멘 이치반",ja:"ラーメン一番",cat:"restaurant",ico:"🍜",lat:10.7774,lng:106.7052,addr:"67 Nguyễn Hữu Cảnh, Q.BT",hrs:"11:00–22:00",ph:"028 3510 6767",qr:["jp","kr"],lang:["ja","ko","en"],open:true,r:4.5,rv:377,sx:255,sy:167},
+  {id:15,name:"Lotteria Vincom",ko:"롯데리아",cat:"restaurant",ico:"🍔",lat:10.7951,lng:106.7222,addr:"B1F Vincom Landmark 81",hrs:"09:30–22:00",ph:"028 3938 1234",qr:["kr","cn","jp","sg"],lang:["ko","en"],open:true,r:4.0,rv:654,sx:362,sy:200},
 ];
 
-// ═══════════════════════════════════════════════════════════
-//  STATE
-// ═══════════════════════════════════════════════════════════
-let lang = localStorage.getItem('vqg_lang') || 'ko';
-let saved = JSON.parse(localStorage.getItem('vqg_saved') || '[]');
-let userLat = 10.7769, userLng = 106.7009;
-let map, userMarker, placeMarkers = [];
-let currentQRFilter = 'all', currentCatFilter = 'all';
-let currentScreen = 'Map';
-let prevScreen = 'Map';
+var lang="ko", saved=[], qrf="all", catf="all", curScr="Map", prevScr="Map";
+var uLat=10.7769, uLng=106.7009;
 
-// ═══════════════════════════════════════════════════════════
-//  T() — translate
-// ═══════════════════════════════════════════════════════════
-function t(key){ return (I18N[lang] || I18N.en)[key] || key; }
-
-// ═══════════════════════════════════════════════════════════
-//  INIT
-// ═══════════════════════════════════════════════════════════
-window.addEventListener('load', async ()=>{
-  document.getElementById('loadingMsg').textContent = '불러오는 중...';
-
-  // Wait for Leaflet with timeout
-  let leafletWait = 0;
-  while(typeof L === 'undefined' && leafletWait < 50){
-    await sleep(100);
-    leafletWait++;
+// INIT — synchronous, no loading screen needed
+(function(){
+  try{ var l=localStorage.getItem("vqg_lang"); if(l) lang=l; }catch(e){}
+  try{ saved=JSON.parse(localStorage.getItem("vqg_saved")||"[]"); }catch(e){}
+  if(localStorage.getItem("vqg_lang")){
+    document.getElementById("ob").style.display="none";
+    showMainUI();
   }
+})();
 
-  await sleep(300);
-  const firstRun = !localStorage.getItem('vqg_lang');
-  if(firstRun){
-    document.getElementById('loading').classList.add('hidden');
-    document.getElementById('onboard').classList.remove('hidden');
-  } else {
-    await initApp();
-  }
-});
-
-async function initApp(){
-  try {
-    applyLang();
-    document.getElementById('loading').classList.add('hidden');
-    initMap();
-    locateMe(true);
-    renderBottomSheet();
-    updateSavedBadge();
-    if('serviceWorker' in navigator && location.protocol !== 'file:'){
-      navigator.serviceWorker.register('sw.js').catch(()=>{});
-    }
-  } catch(e) {
-    console.error('initApp error:', e);
-    document.getElementById('loading').classList.add('hidden');
-    // Show app anyway even if map fails
-    applyLang();
-    renderBottomSheet();
-    updateSavedBadge();
-  }
+function showMainUI(){
+  document.getElementById("mainAb").style.display="block";
+  document.getElementById("qrChips").style.display="flex";
+  document.getElementById("mapWrap").style.display="flex";
+  document.getElementById("bs").style.display="flex";
+  document.getElementById("nav").style.display="flex";
+  applyLang();
+  renderPins();
+  renderBS();
+  updateBdg();
 }
 
-function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
+function t(k){ return (T[lang]||T.en)[k]||k; }
 
-// ═══════════════════════════════════════════════════════════
-//  ONBOARDING
-// ═══════════════════════════════════════════════════════════
-function selectLang(l, btn){
-  lang = l;
-  document.querySelectorAll('.lang-select-btn').forEach(b=>b.classList.remove('selected'));
-  btn.classList.add('selected');
-  const startMap = {vi:'Bắt đầu →',ko:'시작하기 →',zh:'开始 →',ja:'始める →',en:'Start →',th:'เริ่ม →'};
-  document.getElementById('startBtn').textContent = startMap[l] || 'Start →';
+function selLang(l,btn){
+  lang=l;
+  document.querySelectorAll(".lgb").forEach(function(b){b.classList.remove("sel");});
+  btn.classList.add("sel");
+  document.getElementById("stbtn").textContent=(T[l]||T.en).stBtn;
 }
 
-async function startApp(){
-  localStorage.setItem('vqg_lang', lang);
-  document.getElementById('onboard').classList.add('hidden');
-  document.getElementById('loading').classList.remove('hidden');
-  document.getElementById('loading').style.opacity='1';
-  await sleep(400);
-  await initApp();
+function startApp(){
+  try{localStorage.setItem("vqg_lang",lang);}catch(e){}
+  document.getElementById("ob").style.display="none";
+  showMainUI();
 }
 
-// ═══════════════════════════════════════════════════════════
-//  APPLY LANGUAGE
-// ═══════════════════════════════════════════════════════════
 function applyLang(){
-  document.getElementById('appSubtitle').textContent = t('appSubtitle');
-  document.getElementById('searchInput').placeholder = t('searchPlaceholder');
-  document.getElementById('listSearch').placeholder = t('searchPlaceholder');
-  document.getElementById('langFlag').textContent = LANG_FLAG[lang]||'🌏';
-  document.getElementById('navLabelMap').textContent = t('navMap');
-  document.getElementById('navLabelList').textContent = t('navList');
-  document.getElementById('navLabelScan').textContent = t('navScan');
-  document.getElementById('navLabelSaved').textContent = t('navSaved');
-  document.getElementById('scanTitle').textContent = t('scanTitle');
-  document.getElementById('scanHint').innerHTML = t('scanHint')+'<br><small style="opacity:.7;font-size:11px">VietQR, UnionPay, Alipay, WeChat Pay</small>';
-  document.getElementById('savedTitle').textContent = t('savedTitle');
-  document.getElementById('listTitle').textContent = t('listTitle');
+  document.getElementById("abSub").textContent=t("sub");
+  document.getElementById("si").placeholder=t("sp");
+  if(document.getElementById("lsi")) document.getElementById("lsi").placeholder=t("sp");
+  document.getElementById("lgFlag").textContent=FLAGS[lang]||"🌏";
+  document.getElementById("nlMap").textContent=t("nm");
+  document.getElementById("nlList").textContent=t("nl");
+  document.getElementById("nlScan").textContent=t("ns");
+  document.getElementById("nlSaved").textContent=t("nv");
+  document.getElementById("scanT").textContent=t("scanT");
+  document.getElementById("scanH").innerHTML=t("scanH")+'<br><small style="opacity:.65;font-size:11px">VietQR · UnionPay · Alipay · WeChat Pay</small>';
+  document.getElementById("savedT").textContent=t("nv");
+  document.getElementById("listT").textContent=t("lt");
 }
 
-function openLangPicker(){
-  const langs = ['vi','ko','zh','ja','en','th'];
-  const names = {vi:'🇻🇳 Tiếng Việt',ko:'🇰🇷 한국어',zh:'🇨🇳 中文',ja:'🇯🇵 日本語',en:'🇬🇧 English',th:'🇹🇭 ภาษาไทย'};
-  const chosen = prompt('Choose language:\n'+langs.map((l,i)=>`${i+1}. ${names[l]}`).join('\n'), langs.indexOf(lang)+1);
-  if(chosen && langs[parseInt(chosen)-1]){
-    lang = langs[parseInt(chosen)-1];
-    localStorage.setItem('vqg_lang', lang);
-    applyLang();
-    renderBottomSheet();
-    renderList();
-    renderSaved();
-  }
+function openLangPick(){
+  var ll=Object.keys(FLAGS);
+  var opts=ll.map(function(l,i){return (i+1)+". "+FLAGS[l]+" "+l.toUpperCase();}).join("\n");
+  var r=prompt("Language:\n"+opts);
+  if(!r) return;
+  var picked=ll[parseInt(r)-1];
+  if(picked){ lang=picked; try{localStorage.setItem("vqg_lang",lang);}catch(e){} applyLang(); renderPins(); renderBS(); renderList(); }
 }
 
-// ═══════════════════════════════════════════════════════════
-//  MAP
-// ═══════════════════════════════════════════════════════════
-function initMap(){
-  if(typeof L === 'undefined'){
-    document.getElementById('map').innerHTML = `<div style="height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;background:#e8eef4;color:#6b7280;font-size:13px;padding:24px;text-align:center">
-      <div style="font-size:36px">🗺️</div>
-      <div>Bản đồ cần kết nối internet</div>
-      <div style="font-size:11px">Map requires internet connection.<br>Các tính năng khác vẫn hoạt động bình thường.</div>
-    </div>`;
-    return;
-  }
-  try {
-    map = L.map('map',{zoomControl:false,attributionControl:false}).setView([userLat,userLng],16);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,crossOrigin:true}).addTo(map);
-    L.control.attribution({prefix:false,position:'bottomleft'}).addTo(map);
-    addUserMarker();
-    renderMapMarkers();
-    map.on('click', ()=>{ if(bsheetFull) collapseBSheet(); });
-  } catch(e) {
-    console.error('Map init failed:', e);
-  }
-}
-
-function addUserMarker(){
-  if(!map) return;
-  const icon = L.divIcon({
-    html:`<div style="width:18px;height:18px;border-radius:50%;background:#E53E3E;border:3px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.3)"></div>`,
-    iconSize:[18,18], iconAnchor:[9,9], className:''
-  });
-  if(userMarker) userMarker.remove();
-  userMarker = L.marker([userLat,userLng],{icon,zIndexOffset:1000}).addTo(map);
-  const pulse = L.circle([userLat,userLng],{radius:80,color:'#E53E3E',fillColor:'#E53E3E',fillOpacity:.1,weight:1});
-  pulse.addTo(map);
-}
-
-const QR_COLOR = {kr:'#E53E3E',cn:'#C53030',jp:'#553C9A',sg:'#2B6CB0',la:'#276749',th:'#D69E2E',multi:'#B7791F'};
-
-function renderMapMarkers(){
-  if(!map) return;
-  placeMarkers.forEach(m=>m.remove());
-  placeMarkers = [];
-
-  const filtered = filterPlaces();
-  filtered.forEach(p=>{
-    const color = p.qr.length>1 ? QR_COLOR.multi : (QR_COLOR[p.qr[0]] || '#666');
-    const flags = p.qr.slice(0,3).map(q=>({kr:'🇰🇷',cn:'🇨🇳',jp:'🇯🇵',sg:'🇸🇬',la:'🇱🇦',th:'🇹🇭'}[q]||'').join(''));
-    const label = getPlaceName(p).substring(0,14);
-
-    const html = `<div style="display:flex;flex-direction:column;align-items:center;cursor:pointer">
-      <div style="background:${color};color:#fff;padding:4px 8px;border-radius:10px;font-size:10px;font-weight:700;white-space:nowrap;position:relative;max-width:140px;text-overflow:ellipsis;overflow:hidden;line-height:1.3">
-        ${p.icon} ${label}
-        <div style="position:absolute;bottom:-5px;left:50%;transform:translateX(-50%);border:3px solid transparent;border-top:5px solid ${color}"></div>
-      </div>
-      <div style="width:8px;height:8px;border-radius:50%;background:#fff;border:2px solid ${color};margin-top:1px"></div>
-    </div>`;
-
-    const icon = L.divIcon({html, iconSize:[1,1], iconAnchor:[0,28], className:''});
-    const marker = L.marker([p.lat,p.lng],{icon}).addTo(map);
-    marker.on('click',()=>openDetail(p.id));
-    placeMarkers.push(marker);
-  });
-}
-
-function filterPlaces(){
-  let list = PLACES;
-  if(currentQRFilter !== 'all') list = list.filter(p=>p.qr.includes(currentQRFilter));
-  if(currentCatFilter !== 'all') list = list.filter(p=>p.cat === currentCatFilter);
-  const q = document.getElementById('searchInput')?.value.trim().toLowerCase();
-  if(q) list = list.filter(p=>getPlaceName(p).toLowerCase().includes(q)||p.address.toLowerCase().includes(q));
-  return list;
-}
-
-function getPlaceName(p){
-  if(lang==='ko' && p.nameKo) return p.nameKo;
-  if(lang==='zh' && p.nameCn) return p.nameCn;
-  if(lang==='ja' && p.nameJa) return p.nameJa;
+function getName(p){
+  if(lang==="ko"&&p.ko) return p.ko;
+  if(lang==="zh"&&p.zh) return p.zh;
+  if(lang==="ja"&&p.ja) return p.ja;
   return p.name;
 }
 
-function dist(lat1,lng1,lat2,lng2){
-  const R=6371000,dLat=(lat2-lat1)*Math.PI/180,dLng=(lng2-lng1)*Math.PI/180;
-  const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
-  return Math.round(R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a)));
+function dst(a,b){ return Math.round(111320*Math.sqrt(Math.pow(a.lat-b.lat,2)+Math.pow((a.lng-b.lng)*Math.cos(a.lat*Math.PI/180),2))); }
+function fmtD(d){ return d<1000?d+"m":(d/1000).toFixed(1)+"km"; }
+function catBg(c){ return {cafe:"#fefce8",restaurant:"#f0fff4",shopping:"#eff6ff",hotel:"#faf5ff",pharmacy:"#fef2f2"}[c]||"#f9fafb"; }
+function catLbl(c){
+  var m={cafe:{vi:"Cà phê",ko:"카페",zh:"咖啡",ja:"カフェ",en:"Cafe",th:"คาเฟ่"},restaurant:{vi:"Nhà hàng",ko:"식당",zh:"餐厅",ja:"レストラン",en:"Restaurant",th:"ร้านอาหาร"},shopping:{vi:"Mua sắm",ko:"쇼핑",zh:"购物",ja:"ショッピング",en:"Shopping",th:"ช้อปปิ้ง"},hotel:{vi:"Khách sạn",ko:"호텔",zh:"酒店",ja:"ホテル",en:"Hotel",th:"โรงแรม"},pharmacy:{vi:"Nhà thuốc",ko:"약국",zh:"药店",ja:"薬局",en:"Pharmacy",th:"ร้านขายยา"}};
+  return (m[c]||{})[lang]||c;
 }
 
-async function locateMe(silent=false){
-  if(!silent) showToast(t('locating'));
-  return new Promise(resolve=>{
-    if(!navigator.geolocation){ if(!silent) showToast(t('locFailed')); resolve(); return; }
-    navigator.geolocation.getCurrentPosition(pos=>{
-      userLat = pos.coords.latitude;
-      userLng = pos.coords.longitude;
-      if(map){ addUserMarker(); map.setView([userLat,userLng],16); renderMapMarkers(); renderBottomSheet(); }
-      else { renderBottomSheet(); }
-      resolve();
-    }, ()=>{
-      if(!silent) showToast(t('locFailed'));
-      resolve();
-    },{timeout:8000});
+function filtered(){
+  var q=(document.getElementById("si")||{value:""}).value.trim().toLowerCase();
+  return PLACES.filter(function(p){
+    if(qrf!=="all"&&p.qr.indexOf(qrf)<0) return false;
+    if(catf!=="all"&&p.cat!==catf) return false;
+    if(q&&getName(p).toLowerCase().indexOf(q)<0&&p.addr.toLowerCase().indexOf(q)<0) return false;
+    return true;
+  }).sort(function(a,b){return dst({lat:uLat,lng:uLng},a)-dst({lat:uLat,lng:uLng},b);});
+}
+
+function renderPins(){
+  var data=filtered();
+  var g=document.getElementById("pins");
+  if(!g) return;
+  g.innerHTML="";
+  data.forEach(function(p){
+    var c=p.qr.length>1?"#B7791F":(PINC[p.qr[0]]||"#666");
+    var lbl=getName(p);
+    if(lbl.length>12) lbl=lbl.substring(0,12)+"…";
+    var tw=Math.max(62, lbl.length*6.5+22);
+    var bx=Math.min(Math.max(p.sx-tw/2, 2), 398-tw);
+    var el=document.createElementNS("http://www.w3.org/2000/svg","g");
+    el.setAttribute("style","cursor:pointer");
+    el.setAttribute("onclick","openDet("+p.id+")");
+    var op=p.open?1:0.55;
+    el.innerHTML='<rect x="'+bx+'" y="'+(p.sy-22)+'" width="'+tw+'" height="18" rx="5" fill="'+c+'" opacity="'+op+'"/>'
+      +'<text x="'+(bx+tw/2)+'" y="'+(p.sy-10)+'" text-anchor="middle" fill="#fff" font-size="8.5" font-weight="700" font-family="sans-serif">'+p.ico+' '+lbl+'</text>'
+      +'<polygon points="'+(p.sx-3)+','+(p.sy-4)+' '+(p.sx+3)+','+(p.sy-4)+' '+p.sx+','+(p.sy+2)+'" fill="'+c+'" opacity="'+op+'"/>'
+      +'<circle cx="'+p.sx+'" cy="'+(p.sy+4)+'" r="2.5" fill="#fff" stroke="'+c+'" stroke-width="1.5"/>';
+    g.appendChild(el);
   });
 }
 
-function refreshNearby(){ if(map){ renderMapMarkers(); } renderBottomSheet(); showToast('✓'); }
-
-// ═══════════════════════════════════════════════════════════
-//  QR FILTER
-// ═══════════════════════════════════════════════════════════
-function setQRFilter(f,el){
-  currentQRFilter=f;
-  document.querySelectorAll('#filterBar .chip').forEach(c=>c.classList.remove('active'));
-  el.classList.add('active');
-  if(map) renderMapMarkers();
-  renderBottomSheet();
+function pcHtml(p){
+  var d=fmtD(dst({lat:uLat,lng:uLng},p));
+  var flags=p.qr.map(function(q){return QRC[q]||"";}).join("");
+  var badge=p.open?'<span class="bo op">'+t("op")+'</span>':'<span class="bo cl">'+t("cl")+'</span>';
+  return '<div class="pc" onclick="openDet('+p.id+')">'
+    +'<div class="pc-ico" style="background:'+catBg(p.cat)+'">'+p.ico+'</div>'
+    +'<div class="pc-info"><div class="pc-name">'+getName(p)+'</div><div class="pc-meta">'+catLbl(p.cat)+' · '+d+'</div></div>'
+    +'<div class="pc-r"><div class="pc-flags">'+flags+'</div>'+badge+'</div></div>';
 }
 
-function setCatFilter(f,el){
-  currentCatFilter=f;
-  document.querySelectorAll('#filterBar2 .chip').forEach(c=>c.classList.remove('active'));
-  el.classList.add('active');
+function renderBS(){
+  var list=filtered();
+  document.getElementById("bsCount").textContent=list.length+" "+t("ps");
+  var html=list.slice(0,8).map(pcHtml).join("");
+  document.getElementById("bsList").innerHTML=html||'<div style="padding:22px;text-align:center;color:var(--sub);font-size:13px">—</div>';
+}
+
+function openDet(id){
+  var p=PLACES.filter(function(x){return x.id===id;})[0];
+  if(!p) return;
+  prevScr=curScr;
+  var flags=p.qr.map(function(q){return QRC[q]||"";}).join(" ");
+  var ltags=p.lang.map(function(l,i){
+    var n={ko:"한국어",zh:"中文",ja:"日本語",en:"English",vi:"Tiếng Việt",th:"ภาษาไทย"}[l]||l;
+    return '<span class="ltag l'+p.lang[i]+'">'+n+'</span>';
+  }).join("");
+  var isSv=saved.indexOf(id)>=0;
+  document.getElementById("detT").textContent=t("det");
+  document.getElementById("detBody").innerHTML=
+    '<div class="det-hero">'
+    +'<div class="det-ico" style="background:'+catBg(p.cat)+'">'+p.ico+'</div>'
+    +'<div class="det-name">'+getName(p)+'</div>'
+    +'<div class="det-type">'+catLbl(p.cat)+' · ⭐ '+p.r+' ('+p.rv+')</div>'
+    +'<div class="det-flags">'+flags+'</div>'
+    +'<div class="ltags">'+ltags+'</div></div>'
+    +'<div class="act-row">'
+    +'<button class="abt p" onclick="openMaps('+p.lat+','+p.lng+')">📍 '+t("dir")+'</button>'
+    +'<button class="abt s" id="svBtn" onclick="togSave('+id+')">'+(isSv?"⭐ "+t("unsv"):"☆ "+t("sv"))+'</button>'
+    +'<button class="abt s" onclick="doShare('+id+')">↗ '+t("sh")+'</button></div>'
+    +'<div class="dsec"><div class="dsec-t">'+t("addr")+'</div>'
+    +'<div class="irow"><span class="ii">📍</span><div><div class="il">'+t("addr")+'</div><div class="iv">'+p.addr+'</div></div></div>'
+    +'<div class="irow"><span class="ii">🕐</span><div><div class="il">'+t("hrs")+'</div><div class="iv">'+p.hrs+' · <b style="color:'+(p.open?"#276749":"#C53030")+'">'+(p.open?t("op"):t("cl"))+'</b></div></div></div>'
+    +(p.ph?'<div class="irow"><span class="ii">📞</span><div><div class="il">'+t("ph")+'</div><div class="iv">'+p.ph+'</div></div></div>':"")
+    +'</div>'
+    +'<div class="dsec"><div class="dsec-t">'+t("pay")+'</div>'
+    +'<div class="irow"><span class="ii">💳</span><div><div class="il">VietQR Global</div><div class="iv">'+flags+'</div></div></div>'
+    +'<div class="irow"><span class="ii">📱</span><div><div class="il">'+t("pay")+'</div><div class="iv">VietQR · Cash · Visa/Master</div></div></div>'
+    +'</div>'
+    +'<div class="qhint">'+t("qn")+'</div>';
+  showScr("Det");
+}
+
+function openMaps(lat,lng){ window.open("https://maps.google.com/maps?q="+lat+","+lng+"&z=17","_blank"); }
+function doShare(id){ var p=PLACES.filter(function(x){return x.id===id;})[0]; if(navigator.share){navigator.share({title:getName(p),text:getName(p)+" - VietQR Global",url:location.href});}else{showToast("Copied!");} }
+
+function togSave(id){
+  var i=saved.indexOf(id);
+  if(i>=0) saved.splice(i,1); else saved.push(id);
+  try{localStorage.setItem("vqg_saved",JSON.stringify(saved));}catch(e){}
+  updateBdg(); openDet(id);
+}
+function updateBdg(){
+  var n=saved.length, el=document.getElementById("svBdg");
+  el.textContent=n; el.style.display=n>0?"inline":"none";
+}
+
+function setQR(f,el){
+  qrf=f;
+  document.querySelectorAll("#qrChips .chip").forEach(function(c){c.classList.remove("on");});
+  el.classList.add("on");
+  renderPins(); renderBS();
+}
+function setCat(f,el){
+  catf=f;
+  document.querySelectorAll("#catChips .chip").forEach(function(c){c.classList.remove("on");});
+  el.classList.add("on");
   renderList();
 }
+function onSrch(){ var v=document.getElementById("si").value; document.getElementById("clrBtn").style.display=v?"block":"none"; renderPins(); renderBS(); }
+function clrSrch(){ document.getElementById("si").value=""; document.getElementById("clrBtn").style.display="none"; renderPins(); renderBS(); }
 
-// ═══════════════════════════════════════════════════════════
-//  BOTTOM SHEET
-// ═══════════════════════════════════════════════════════════
-let bsheetFull = false;
-
-function renderBottomSheet(){
-  const list = filterPlaces().sort((a,b)=>dist(userLat,userLng,a.lat,a.lng)-dist(userLat,userLng,b.lat,b.lng));
-  const n = list.length;
-  document.getElementById('bsheetCount').textContent = `${n} ${t('places')}`;
-  const html = list.slice(0,8).map(p=>placeCardHtml(p)).join('');
-  document.getElementById('bsheetList').innerHTML = html || `<div style="padding:24px;text-align:center;color:var(--muted);font-size:13px">No results</div>`;
-  document.getElementById('bottomSheet').classList.add('open');
-}
-
-function placeCardHtml(p){
-  const d = dist(userLat,userLng,p.lat,p.lng);
-  const distStr = d<1000 ? d+'m' : (d/1000).toFixed(1)+'km';
-  const flags = p.qr.map(q=>({kr:'🇰🇷',cn:'🇨🇳',jp:'🇯🇵',sg:'🇸🇬',la:'🇱🇦',th:'🇹🇭'}[q]||'')).join('');
-  const statusBadge = p.open ? `<span class="badge-open">${t('open')}</span>` : `<span class="badge-closed">${t('closed')}</span>`;
-  return `<div class="place-card" onclick="openDetail(${p.id})">
-    <div class="place-icon" style="background:${getCatBg(p.cat)}">${p.icon}</div>
-    <div class="place-info">
-      <div class="place-name">${getPlaceName(p)}</div>
-      <div class="place-meta">${getCatLabel(p.cat)} · ${distStr}</div>
-    </div>
-    <div class="place-right">
-      <div class="place-flags">${flags}</div>
-      ${statusBadge}
-    </div>
-  </div>`;
-}
-
-function getCatBg(cat){
-  return {cafe:'#fefce8',restaurant:'#f0fff4',shopping:'#eff6ff',hotel:'#faf5ff',pharmacy:'#fef2f2'}[cat]||'#f9fafb';
-}
-function getCatLabel(cat){
-  const map = {
-    cafe:{vi:'Cà phê',ko:'카페',zh:'咖啡',ja:'カフェ',en:'Cafe',th:'คาเฟ่'},
-    restaurant:{vi:'Nhà hàng',ko:'식당',zh:'餐厅',ja:'レストラン',en:'Restaurant',th:'ร้านอาหาร'},
-    shopping:{vi:'Mua sắm',ko:'쇼핑',zh:'购物',ja:'ショッピング',en:'Shopping',th:'ช้อปปิ้ง'},
-    hotel:{vi:'Khách sạn',ko:'호텔',zh:'酒店',ja:'ホテル',en:'Hotel',th:'โรงแรม'},
-    pharmacy:{vi:'Nhà thuốc',ko:'약국',zh:'药店',ja:'薬局',en:'Pharmacy',th:'ร้านขายยา'},
-  };
-  return (map[cat]||{})[lang] || cat;
-}
-
-function collapseBSheet(){ bsheetFull=false; }
-
-// ═══════════════════════════════════════════════════════════
-//  DETAIL
-// ═══════════════════════════════════════════════════════════
-function openDetail(id){
-  const p = PLACES.find(x=>x.id===id);
-  if(!p) return;
-  prevScreen = currentScreen;
-  const d = dist(userLat,userLng,p.lat,p.lng);
-  const distStr = d<1000 ? d+'m' : (d/1000).toFixed(1)+'km';
-  const flags = p.qr.map(q=>({kr:'🇰🇷',cn:'🇨🇳',jp:'🇯🇵',sg:'🇸🇬',la:'🇱🇦',th:'🇹🇭'}[q]||'')).join(' ');
-  const langTags = p.lang.map(l=>({ko:'한국어',zh:'中文',ja:'日本語',en:'English',vi:'Tiếng Việt'}[l]||l))
-    .map((n,i)=>`<span class="lang-tag lt-${p.lang[i]}">${n}</span>`).join('');
-  const isSaved = saved.includes(id);
-  const saveLabel = isSaved ? t('unsave') : t('save');
-
-  document.getElementById('detailAppbarTitle').textContent = t('detailTitle');
-  document.getElementById('detailBody').innerHTML = `
-    <div class="detail-hero">
-      <div class="detail-icon-big" style="background:${getCatBg(p.cat)}">${p.icon}</div>
-      <div class="detail-name">${getPlaceName(p)}</div>
-      <div class="detail-type">${getCatLabel(p.cat)} · ${distStr} · ⭐ ${p.rating} (${p.reviews})</div>
-      <div class="detail-flags">${flags}</div>
-      <div class="lang-tags">${langTags}</div>
-    </div>
-    <div class="action-row">
-      <button class="act-btn act-primary" onclick="openMaps(${p.lat},${p.lng},'${getPlaceName(p).replace(/'/g,'\\'')}')">📍 ${t('directions')}</button>
-      <button class="act-btn act-sec" id="saveBtn" onclick="toggleSave(${p.id})">${isSaved?'⭐':'☆'} ${saveLabel}</button>
-      <button class="act-btn act-sec" onclick="sharePlace(${p.id})">↗ ${t('share')}</button>
-    </div>
-    <div class="detail-section">
-      <div class="detail-section-title">${t('address')}</div>
-      <div class="info-row"><span class="info-icon">📍</span><div><div class="info-label">${t('address')}</div><div class="info-val">${p.address}</div></div></div>
-      <div class="info-row"><span class="info-icon">🕐</span><div><div class="info-label">${t('hours')}</div><div class="info-val">${p.hours} · <span style="color:${p.open?'#276749':'#C53030'};font-weight:700">${p.open?t('open'):t('closed')}</span></div></div></div>
-      ${p.phone?`<div class="info-row"><span class="info-icon">📞</span><div><div class="info-label">${t('phone')}</div><div class="info-val">${p.phone}</div></div></div>`:''}
-    </div>
-    <div class="detail-section">
-      <div class="detail-section-title">${t('payment')}</div>
-      <div class="info-row"><span class="info-icon">💳</span><div><div class="info-label">VietQR Global</div><div class="info-val">${flags}</div></div></div>
-      <div class="info-row"><span class="info-icon">📱</span><div><div class="info-label">${t('payment')}</div><div class="info-val">VietQR · Tiền mặt · Visa/Master</div></div></div>
-    </div>
-    <div class="qr-hint">${t('qrNote')}</div>`;
-
-  showScreen('Detail');
-}
-
-function openMaps(lat,lng,name){
-  window.open(`https://maps.google.com/maps?q=${lat},${lng}&z=17&hl=${lang}`, '_blank');
-}
-
-function sharePlace(id){
-  const p = PLACES.find(x=>x.id===id);
-  if(navigator.share){
-    navigator.share({title:getPlaceName(p),text:`${getPlaceName(p)} - VietQR Global`,url:window.location.href});
-  } else { showToast('URL copied!'); }
-}
-
-function toggleSave(id){
-  if(saved.includes(id)) saved = saved.filter(x=>x!==id);
-  else saved.push(id);
-  localStorage.setItem('vqg_saved', JSON.stringify(saved));
-  updateSavedBadge();
-  openDetail(id);
-}
-
-function updateSavedBadge(){
-  const badge = document.getElementById('savedBadge');
-  badge.textContent = saved.length;
-  badge.classList.toggle('hidden', saved.length===0);
-}
-
-// ═══════════════════════════════════════════════════════════
-//  LIST
-// ═══════════════════════════════════════════════════════════
 function renderList(){
-  const q = document.getElementById('listSearch')?.value.trim().toLowerCase() || '';
-  let list = PLACES;
-  if(currentQRFilter !== 'all') list = list.filter(p=>p.qr.includes(currentQRFilter));
-  if(currentCatFilter !== 'all') list = list.filter(p=>p.cat === currentCatFilter);
-  if(q) list = list.filter(p=>getPlaceName(p).toLowerCase().includes(q)||p.address.toLowerCase().includes(q));
-  list.sort((a,b)=>dist(userLat,userLng,a.lat,a.lng)-dist(userLat,userLng,b.lat,b.lng));
-
-  document.getElementById('listSub').textContent = `${list.length} ${t('places')}`;
-
-  const cats = [...new Set(list.map(p=>p.cat))];
-  let html = '';
-  cats.forEach(cat=>{
-    const group = list.filter(p=>p.cat===cat);
-    html += `<div class="list-section-header">${getCatLabel(cat)} · ${group.length}</div>`;
-    html += group.map(p=>placeCardHtml(p)).join('');
+  var q=(document.getElementById("lsi")||{value:""}).value.trim().toLowerCase();
+  var list=PLACES.filter(function(p){
+    if(qrf!=="all"&&p.qr.indexOf(qrf)<0) return false;
+    if(catf!=="all"&&p.cat!==catf) return false;
+    if(q&&getName(p).toLowerCase().indexOf(q)<0) return false;
+    return true;
+  }).sort(function(a,b){return dst({lat:uLat,lng:uLng},a)-dst({lat:uLat,lng:uLng},b);});
+  document.getElementById("listSub").textContent=list.length+" "+t("ps");
+  var cats=[]; list.forEach(function(p){ if(cats.indexOf(p.cat)<0) cats.push(p.cat); });
+  var html="";
+  cats.forEach(function(c){
+    html+='<div class="lsh">'+catLbl(c)+'</div>';
+    html+=list.filter(function(p){return p.cat===c;}).map(pcHtml).join("");
   });
-  document.getElementById('listBody').innerHTML = html || `<div style="padding:40px;text-align:center;color:var(--muted);font-size:14px">No results</div>`;
+  document.getElementById("listBody").innerHTML=html||'<div style="padding:40px;text-align:center;color:var(--sub)">—</div>';
 }
 
-function filterList(){ renderList(); }
-
-// ═══════════════════════════════════════════════════════════
-//  SAVED
-// ═══════════════════════════════════════════════════════════
-function renderSaved(){
-  const list = PLACES.filter(p=>saved.includes(p.id));
-  const container = document.getElementById('savedContent');
-  if(!list.length){
-    container.innerHTML = `<div class="saved-empty"><div class="big-icon">⭐</div><p>${t('noSaved')}</p></div>`;
-  } else {
-    container.innerHTML = list.map(p=>placeCardHtml(p)).join('');
-  }
-}
-
-// ═══════════════════════════════════════════════════════════
-//  SCAN
-// ═══════════════════════════════════════════════════════════
-function simulateScan(){
-  const samples = [
-    {title:'VietQR – Vietcombank',tags:['🇰🇷 KoQR','🇨🇳 UnionPay','🇸🇬 SGQR'],color:'#276749'},
-    {title:'Alipay+ (China)',tags:['🇨🇳 Alipay','🇨🇳 WeChat Pay'],color:'#2B6CB0'},
-    {title:'PayPay (Japan)',tags:['🇯🇵 PayPay','🇯🇵 d払い'],color:'#E53E3E'},
-    {title:'PromptPay (Thailand)',tags:['🇹🇭 PromptPay'],color:'#D69E2E'},
+function doScan(){
+  var s=[
+    {t:"VietQR – Vietcombank",tags:["🇰🇷 KoQR","🇨🇳 UnionPay","🇸🇬 SGQR"],c:"#276749"},
+    {t:"Alipay+ (China)",tags:["🇨🇳 Alipay","🇨🇳 WeChat Pay"],c:"#C53030"},
+    {t:"PayPay (Japan)",tags:["🇯🇵 PayPay"],c:"#553C9A"},
+    {t:"PromptPay (Thailand)",tags:["🇹🇭 PromptPay"],c:"#D69E2E"},
   ];
-  const s = samples[Math.floor(Math.random()*samples.length)];
-  document.getElementById('scanResult').style.display='block';
-  document.getElementById('scanResultTitle').textContent='✅ ' + s.title;
-  document.getElementById('scanResultTitle').style.color=s.color;
-  document.getElementById('scanResultTags').innerHTML = s.tags.map(tag=>`<span class="lang-tag lt-en" style="background:#f0f4ff;color:#1a237e">${tag}</span>`).join('');
+  var r=s[Math.floor(Math.random()*s.length)];
+  document.getElementById("scanR").style.display="block";
+  document.getElementById("srT").textContent="✅ "+r.t;
+  document.getElementById("srT").style.color=r.c;
+  document.getElementById("srTags").innerHTML=r.tags.map(function(tg){return '<span class="st">'+tg+'</span>';}).join("");
 }
 
-// ═══════════════════════════════════════════════════════════
-//  NAVIGATION
-// ═══════════════════════════════════════════════════════════
-function navTo(screen){
-  showScreen(screen);
-  if(screen==='List'){ renderList(); }
-  if(screen==='Saved'){ renderSaved(); }
-  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
-  document.getElementById('nav'+screen)?.classList.add('active');
+function renderSaved(){
+  var list=PLACES.filter(function(p){return saved.indexOf(p.id)>=0;});
+  document.getElementById("savedBody").innerHTML=list.length?list.map(pcHtml).join("")
+    :'<div class="sv-empty"><div class="bi">⭐</div><p>'+t("noSv")+'</p></div>';
 }
 
-function showScreen(name){
-  const prev = currentScreen;
-  document.getElementById('screen'+prev)?.classList.add(name==='Detail'?'slide-left':'hidden');
-  document.getElementById('screen'+name)?.classList.remove('hidden','slide-left');
-  currentScreen = name;
-  const hideNav = name==='Detail';
-  document.getElementById('navbar').style.display = hideNav ? 'none' : '';
+function navTo(s){
+  ["Det","List","Scan","Saved"].forEach(function(n){document.getElementById("scr"+n).classList.add("off");});
+  document.querySelectorAll(".nb").forEach(function(b){b.classList.remove("on");});
+  var nb=document.getElementById("nb"+s); if(nb) nb.classList.add("on");
+  document.getElementById("nav").style.display="flex";
+  curScr=s; prevScr=s;
+  if(s==="List"){ renderList(); document.getElementById("scrList").classList.remove("off"); }
+  else if(s==="Scan"){ document.getElementById("scrScan").classList.remove("off"); }
+  else if(s==="Saved"){ renderSaved(); document.getElementById("scrSaved").classList.remove("off"); }
 }
 
+function showScr(s){
+  document.getElementById("scr"+s).classList.remove("off");
+  document.getElementById("nav").style.display="none";
+  curScr=s;
+}
 function goBack(){
-  const from = currentScreen;
-  showScreen(prevScreen || 'Map');
-  document.getElementById('screen'+from)?.classList.add('hidden');
-  document.getElementById('navbar').style.display='';
-  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
-  document.getElementById('nav'+(prevScreen||'Map'))?.classList.add('active');
+  document.getElementById("scr"+curScr).classList.add("off");
+  document.getElementById("nav").style.display="flex";
+  curScr=prevScr;
+  document.querySelectorAll(".nb").forEach(function(b){b.classList.remove("on");});
+  var nb=document.getElementById("nb"+prevScr); if(nb) nb.classList.add("on");
 }
 
-// ═══════════════════════════════════════════════════════════
-//  SEARCH
-// ═══════════════════════════════════════════════════════════
-function onSearchInput(){
-  const val = document.getElementById('searchInput').value;
-  document.getElementById('clearSearchBtn').style.display = val ? 'block' : 'none';
-  if(map) renderMapMarkers();
-  renderBottomSheet();
-}
-function clearSearch(){
-  document.getElementById('searchInput').value='';
-  document.getElementById('clearSearchBtn').style.display='none';
-  if(map) renderMapMarkers();
-  renderBottomSheet();
+var mapExpanded=false;
+function toggleMap(){
+  var mw=document.getElementById("mapWrap");
+  var btn=document.getElementById("toggleMapBtn");
+  mapExpanded=!mapExpanded;
+  mw.style.height=mapExpanded?"400px":"220px";
+  btn.textContent=mapExpanded?"⬇️":"⬆️";
 }
 
-// ═══════════════════════════════════════════════════════════
-//  TOAST
-// ═══════════════════════════════════════════════════════════
-let toastTimer;
+function locateMe(){
+  showToast("📍...");
+  if(!navigator.geolocation){showToast("No GPS");return;}
+  navigator.geolocation.getCurrentPosition(function(pos){
+    uLat=pos.coords.latitude; uLng=pos.coords.longitude;
+    renderPins(); renderBS(); showToast("✓");
+  },function(){showToast("GPS error");},{timeout:6000});
+}
+function doRefresh(){ renderPins(); renderBS(); showToast("✓"); }
+
+var tTimer;
 function showToast(msg){
-  const el = document.getElementById('toast');
-  el.textContent = msg; el.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(()=>el.classList.remove('show'), 2200);
+  var el=document.getElementById("toast");
+  el.textContent=msg; el.classList.add("show");
+  clearTimeout(tTimer);
+  tTimer=setTimeout(function(){el.classList.remove("show");},2000);
 }
 </script>
 </body>
